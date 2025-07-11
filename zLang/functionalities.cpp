@@ -1,7 +1,7 @@
-#include <iostream>
 #include <string>
 #include <cmath>
 #include <climits>
+#include <iostream>
 #include <sstream>
 #include "input_parse.h"
 #include "data.h"
@@ -18,7 +18,7 @@ int operation_statement(std::string x, std::string op, std::string y) {
         return 0;
     }
 
-    if (y == "") {
+    if (y.empty()) {
         return val_x;
     }
 
@@ -30,22 +30,19 @@ int operation_statement(std::string x, std::string op, std::string y) {
         return 0;
     }
 
-    if (op == "+=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] += val_y;
-            return num_vars[x];
-        }
-    } else if (op == "-=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] -= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "*=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] *= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "/=") {
+    if (op == "+=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] += val_y;
+        return num_vars[x];
+    }
+    if (op == "-=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] -= val_y;
+        return num_vars[x];
+    }
+    if (op == "*=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] *= val_y;
+        return num_vars[x];
+    }
+    if (op == "/=") {
         if (val_y == 0) {
             std::cout << "Division by zero error\n";
             return 0;
@@ -54,7 +51,8 @@ int operation_statement(std::string x, std::string op, std::string y) {
             num_vars[x] /= val_y;
             return num_vars[x];
         }
-    } else if (op == "%=") {
+    }
+    if (op == "%=") {
         if (val_y == 0) {
             std::cout << "Modulo by zero error\n";
             return 0;
@@ -63,87 +61,69 @@ int operation_statement(std::string x, std::string op, std::string y) {
             num_vars[x] %= val_y;
             return num_vars[x];
         }
-    } else if (op == "&=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] &= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "|=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] |= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "^=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] ^= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "<<=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] <<= val_y;
-            return num_vars[x];
-        }
-    } else if (op == ">>=") {
-        if (get_num_val(x) != INT_MAX) {
-            num_vars[x] >>= val_y;
-            return num_vars[x];
-        }
-    } else if (op == "+") {
-        return val_x + val_y;
-    } else if (op == "-") {
-        return val_x - val_y;
-    } else if (op == "*") {
-        return val_x * val_y;
-    } else if (op == "/") {
+    }
+    if (op == "&=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] &= val_y;
+        return num_vars[x];
+    }
+    if (op == "|=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] |= val_y;
+        return num_vars[x];
+    }
+    if (op == "^=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] ^= val_y;
+        return num_vars[x];
+    }
+    if (op == "<<=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] <<= val_y;
+        return num_vars[x];
+    }
+    if (op == ">>=" && get_num_val(x) != INT_MAX) {
+        num_vars[x] >>= val_y;
+        return num_vars[x];
+    }
+    if (op == "+") return val_x + val_y;
+    if (op == "-") return val_x - val_y;
+    if (op == "*") return val_x * val_y;
+    if (op == "/") {
         if (val_y == 0) {
             std::cout << "Division by zero error\n";
             return 0;
         }
         return val_x / val_y;
-    } else if (op == "%") {
+    }
+    if (op == "%") {
         if (val_y == 0) {
             std::cout << "Modulo by zero error\n";
             return 0;
         }
         return val_x % val_y;
-    } else if (op == "&") {
-        return val_x & val_y;
-    } else if (op == "|") {
-        return val_x | val_y;
-    } else if (op == "^") {
-        return val_x ^ val_y;
-    } else if (op == "<<") {
-        return val_x << val_y;
-    } else if (op == ">>") {
-        return val_x >> val_y;
     }
+    if (op == "&") return val_x & val_y;
+    if (op == "|") return val_x | val_y;
+    if (op == "^") return val_x ^ val_y;
+    if (op == "<<") return val_x << val_y;
+    if (op == ">>") return val_x >> val_y;
 
     return LLONG_MAX;
 }
 
-void proccess_line(std::string& x){
-
+void proccess_line(std::string& x) {
     std::stringstream ss(x);
-    std::string start_keyword,name,eq,op,v,y,z;
+    std::string start_keyword, name, eq, op, v, y, z;
 
     ss >> start_keyword;
 
-    if(start_keyword == "nr"){
+    if (start_keyword == "nr") {
         ss >> name >> eq >> v;
         if (!(ss >> y >> z)) {
             y = "";
             z = "";
         }
 
-        if(name != "" && eq == "="){
-            int val;
-            if(y == ""){
-                val = operation_statement(v, "", "");
-            } else {
-                val = operation_statement(v, y, z);
-            }
-
-            if( val < INT_MAX && val >= INT_MIN){
+        if (!name.empty() && eq == "=") {
+            int val = y.empty() ? operation_statement(v, "", "") : operation_statement(v, y, z);
+            if (val < INT_MAX && val >= INT_MIN) {
                 num_vars[name] = val;
             } else {
                 std::cout << "NR VALUE EXCEEDS LIMIT\n";
@@ -153,43 +133,45 @@ void proccess_line(std::string& x){
             std::cout << "NR COULDN'T BE DECLARED\n";
             return;
         }
-    } else if(start_keyword == "print") {
+    } else if (start_keyword == "print") {
         std::string line;
         std::getline(ss, line);
 
         size_t i = 0;
-        while (i < line.size() && isspace(line[i])) {
-            ++i;
-        }
+        while (i < line.size() && isspace(line[i])) ++i;
 
-        for (; i < line.size(); ++i) {
-
-            if((i+1)<=line.size()){
-                if(line[i]=='!'&&std::tolower(line[i+1])=='n'){
-                    std::cout<<"\n";
-                    i+=2; // skip line
-                }
+        while (i < line.size()) {
+            if ((i + 1) < line.size() && line[i] == '!' && std::tolower(line[i + 1]) == 'n') {
+                std::cout << "\n";
+                i += 2;
+                continue;
             }
 
             if (line[i] == '$') {
-                std::string varname = "";
+                std::string varname;
                 ++i;
                 while (i < line.size() && !isspace(line[i])) {
-                    varname += line[i];
-                    ++i;
+                    varname += line[i++];
                 }
-                --i;
-                if (get_num_val(varname)) {
+                if (get_num_val(varname) != INT_MAX) {
                     std::cout << num_vars[varname];
                 } else {
                     std::cout << varname;
                 }
             } else {
-                std::cout << line[i];
+                std::cout << line[i++];
             }
         }
-        std::cout << std::endl;
-    }else {
+
+    } else if (start_keyword == "toinput") {
+        ss >> z;
+        if (is_variable(z)) {
+            set_variable(z, program_input[current_zlang_input_line]);
+            ++current_zlang_input_line;
+        } else {
+            std::cout << "COULDNT ASSIGN READ VALUE TO NON EXISTENT VARIABLE\n";
+        }
+    } else {
         ss >> op >> z;
         operation_statement(start_keyword, op, z);
     }
