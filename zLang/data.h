@@ -7,5 +7,7 @@
 extern std::unordered_map<std::string, int> num_vars;
 
 int get_num_val(std::string& name);
+bool is_variable(std::string& name);
+void set_variable(std::string& name, std::string& value);
 
 #endif
