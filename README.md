@@ -30,7 +30,9 @@ x -= y
 x -= 5
 ```
 
-**Print Text & Variables**
+**IO**
+
+*Output*
 
 ```zLang
 nr x = 10
@@ -44,6 +46,31 @@ print this is x: $x and this is y: $y
 
 ```zLang
 this is x: 10 and this is y: 15
+```
+
+*Input*
+
+--> Input is: 
+```
+6 9 
+```
+
+```zLang
+nr x = 0
+nr y = 0
+
+toinput x
+toinput y
+
+print $x !n
+print $y !n
+```
+
+--> Will output
+
+```zLang
+6
+9
 ```
 
 **Print new lines**
