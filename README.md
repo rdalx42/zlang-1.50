@@ -44,15 +44,15 @@ this is x: 10 and this is y: 15
 
 **Print new lines**
 
-```zLang
-print Hello !nWorld
+```zlang 
+print Hello !n World !n NewLine
 ```
-
 --> Will output
 
 ```zLang
 Hello
-World
+ World
+  NewLine
 ```
 
 **Supports operations:**
