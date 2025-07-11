@@ -1,6 +1,5 @@
 # zLang
 An interpreted WORK IN PROGRESS programming language built with c++
-zLang is made in c++ but in the way a C developer would do it - this means to classes, I thought it would be a fun challange
 
 zLang follow a very STRICT way of typing, spaces are requiered between every keyword
 
@@ -18,12 +17,12 @@ nr x = 69
 
 ```zLang
 nr x = 10
-nr y = 10
+nr y = x * 50
 
 y += x
 y += 1
 x -= y
-x -= 5
+x /= 5
 ```
 
 **Print Text & Variables**
@@ -41,3 +40,35 @@ print this is x: $x and this is y: $y
 ```zLang
 this is x: 10 and this is y: 15
 ```
+
+**Capabilities**
+
+Operations:
+
+// Arithmetic
++   
+-   
+*   
+/   
+%   
+
+// Compound assignment (arithmetic)
++=  
+-=  
+*=  
+/=  
+%=  
+
+// Bitwise
+&   
+|   
+^   
+<<  
+>>  
+
+// Compound assignment (bitwise)
+&=  
+|=  
+^=  
+<<= 
+>>= 
