@@ -18,7 +18,7 @@ nr x = 69
 
 ```zLang
 nr x = 10
-nr y = 10
+nr y = x / 10
 
 y += x
 y += 1
