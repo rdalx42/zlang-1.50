@@ -3,7 +3,7 @@ An interpreted WORK IN PROGRESS programming language built with c++.
 
 <img width="180" height="180" alt="zlanglogo" src="https://github.com/user-attachments/assets/8d7c95fd-9e27-43d2-8eda-edb16794cb3e" />
 
-zLang is made in c++ but in the way a C developer would do it - this means to classes, I thought it would be a fun challange.
+zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
 zLang follows a very STRICT way of typing, spaces are requiered between every keyword.
 
