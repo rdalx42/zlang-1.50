@@ -1,6 +1,6 @@
 # zLang
 An interpreted WORK IN PROGRESS programming language built with c++
-zLang is made in c++ but in the way a C developer would do it
+zLang is made in c++ but in the way a C developer would do it - this means to classes, I thought it would be a fun challange
 
 zLang follow a very STRICT way of typing, spaces are requiered between every keyword
 
