@@ -163,6 +163,14 @@ void proccess_line(std::string& x){
         }
 
         for (; i < line.size(); ++i) {
+
+            if((i+1)<=line.size()){
+                if(line[i]=='!'&&std::tolower(line[i+1])=='n'){
+                    std::cout<<"\n";
+                    i+=2; // skip line
+                }
+            }
+
             if (line[i] == '$') {
                 std::string varname = "";
                 ++i;
@@ -181,7 +189,7 @@ void proccess_line(std::string& x){
             }
         }
         std::cout << std::endl;
-    } else {
+    }else {
         ss >> op >> z;
         operation_statement(start_keyword, op, z);
     }
