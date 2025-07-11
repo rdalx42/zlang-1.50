@@ -42,6 +42,19 @@ print this is x: $x and this is y: $y
 this is x: 10 and this is y: 15
 ```
 
+**Print new lines**
+
+```zLang
+print Hello !nWorld
+```
+
+--> Will output
+
+```zLang
+Hello
+World
+```
+
 **Supports operations:**
 ```zLang
 -=;
