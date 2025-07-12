@@ -5,7 +5,7 @@ An interpreted WORK IN PROGRESS programming language built with c++.
 
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
-zLang follows a very STRICT way of typing, spaces are requiered between every keyword.
+zLang follows a very STRICT way of typing, spaces are requiered between every keyword and new keywords must be on different lines.
 The code input is read via fstream and read line by line
 
 Here are some of its functionalities:
@@ -16,6 +16,7 @@ Current types: nr [Number]
 
 ```zLang
 nr x = 69
+-- This is a comment
 ```
 
 **Increment/decrement Variables**
@@ -84,6 +85,20 @@ print Hello !n World !n NewLine
 Hello
  World
   NewLine
+```
+
+**Use basic true/false expressions**
+
+```zLang
+-- here x will be false
+bool x = 5 is 6
+
+-- here x will be true
+x = 5 isnt 6
+
+-- this works for: >=,<=,>,< operators.
+
+print $x
 ```
 
 **Supports operations:**
