@@ -12,7 +12,7 @@ Here are some of its functionalities:
 
 **Declare Variables**
 
-Current types: nr [Number]
+Current types: nr [Number], bool [Boolean]
 
 ```zLang
 nr x = 69
