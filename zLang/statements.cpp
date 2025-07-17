@@ -109,50 +109,60 @@ int operation_statement(std::string x, std::string op, std::string y) {
     return LLONG_MAX;
 }
 
-bool bool_statement(std::string x, std::string op, std::string y){
+bool bool_statement(std::string x, std::string op, std::string y) {
 
-    // x and y must be same type until we add functions - which will probably not happen really soon
+    int yval = INT_MAX;
+    int xval = INT_MAX;
 
-    int yval=INT_MAX;
-    int xval=INT_MAX;
-
-    if(is_num(y)){
+    if (is_num(y)) {
         yval = std::stoi(y);
-    }else if(num_vars.find(y)!=num_vars.end()){
+    } else if (num_vars.find(y) != num_vars.end()) {
         yval = num_vars[y];
     }
 
-    if(is_num(x)){
+    if (is_num(x)) {
         xval = std::stoi(x);
-    }else if(num_vars.find(x)!=num_vars.end()){
+    } else if (num_vars.find(x) != num_vars.end()) {
         xval = num_vars[x];
     }
 
-    if(yval!=INT_MAX&&xval!=INT_MAX){ // knowing that the biggest nr limit = INT_MAX - 1
+    if (yval != INT_MAX && xval != INT_MAX) {
+        if (op == "is") return xval == yval;
+        if (op == "isnt") return xval != yval;
+        if (op == ">=") return xval >= yval;
+        if (op == "<=") return xval <= yval;
+        if (op == ">") return xval > yval;
+        if (op == "<") return xval < yval;
+    }
 
-        if(op == "is"){
-            return xval == yval;
-        }
+    bool xb, yb;
+    bool x_set = false, y_set = false;
 
-        if(op == "isnt"){
-            return xval != yval;
-        }
+    if (x == "true") {
+        xb = true;
+        x_set = true;
+    } else if (x == "false") {
+        xb = false;
+        x_set = true;
+    } else if (bool_vars.find(x) != bool_vars.end()) {
+        xb = bool_vars[x];
+        x_set = true;
+    }
 
-        if(op == ">="){
-            return xval >= yval;
-        }
+    if (y == "true") {
+        yb = true;
+        y_set = true;
+    } else if (y == "false") {
+        yb = false;
+        y_set = true;
+    } else if (bool_vars.find(y) != bool_vars.end()) {
+        yb = bool_vars[y];
+        y_set = true;
+    }
 
-        if(op == "<="){
-            return xval <= yval;
-        }
-
-        if(op == ">"){
-            return xval > yval;
-        }
-
-        if(op == "<"){
-            return xval < yval;
-        }
+    if (x_set && y_set) {
+        if (op == "is") return xb == yb;
+        if (op == "isnt") return xb != yb;
     }
 
     return false;
