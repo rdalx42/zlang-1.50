@@ -8,6 +8,7 @@
 #include "statemenets.h"
 
 void proccess_line(std::string& x) {
+    line_indx++;
     std::stringstream ss(x);
     std::string start_keyword, name, eq, op, v, y, z;
 
@@ -106,18 +107,79 @@ void proccess_line(std::string& x) {
         }
     }else if(start_keyword == "--"){
         return;
+    }else if(start_keyword == "if"){
+        std::string Z,Y,OpenParem;
+        ss >> z >> Z >> Y >> OpenParem;
+
+        // here we have to parse the if statement
+
+        if(bool_statement(z,Z,Y) == false){
+
+            // skip false if
+
+            //int depth = 0;
+            //std::string content = "";
+            //std::cout<<line_indx<<"\n";
+            for(int i = line_indx;i<lines; ++ line_indx){
+               // std::cout<<progr
+             //   if(zlang_input[i].find("{")!=std::string::npos){depth++;}
+              //  if(zlang_input[i].find("}")!=std::string::npos){depth--;}
+
+                //content+=zlang_input[i];
+                line_indx=i;
+            }std::cout<<line_indx<<"\n";
+
+        } else if (start_keyword == "if") {
+            std::string Z, Y, OpenBrace;
+            ss >> z >> Z >> Y >> OpenBrace;
+
+            bool condition = bool_statement(z, Z, Y);
+
+            int depth = 0;
+            bool started = false;
+
+            for (int i = line_indx; i < lines; ++i) {
+                std::string line = zlang_input[i];
+
+                if (line.find("{") != std::string::npos) {
+                    depth++;
+                    started = true;
+                    continue; // Skip the opening brace
+                }
+
+                if (line.find("}") != std::string::npos) {
+                    depth--;
+                    if (depth == 0) {
+                        line_indx = i + 1; // Advance to the line after block
+                        break;
+                    }
+                    continue; // Skip the closing brace
+                }
+
+                if (started && depth > 0) {
+                    if (condition) {
+                        proccess_line(line);
+                    }
+                }
+            }
+        }
+
     }else {
         ss >> op >> z;
-        operation_statement(start_keyword, op, z);
+        std::string Z,Y;
+        ss >> Z >> Y;
+
+        if (get_var_type(start_keyword)=="num type"){
+            num_vars[start_keyword] = operation_statement(z,Z,Y);
+        }
 
         // only a bool or an if statement can have a bool_statement
 
         if(get_var_type(start_keyword) == "bool type"){
-            std::string Z,Y;
-            ss >> Z >> Y;
 
             bool_vars[start_keyword]=bool_statement(z,Z,Y);
 
         }
     }
+
 }
