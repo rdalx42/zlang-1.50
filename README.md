@@ -1,4 +1,4 @@
-# zLang 1.20
+# zLang 1.30
 An interpreted WORK IN PROGRESS programming language built with c++.
 
 <img width="180" height="180" alt="zlanglogo_120" src="https://github.com/user-attachments/assets/982c184a-c7f2-45d6-979e-8c6ad15d6d38" />
@@ -99,6 +99,32 @@ x = 5 isnt 6
 -- this works for: >=,<=,>,< operators.
 
 print $x
+```
+
+**Use basic if statements**
+
+```zLang
+
+nr x = 10
+nr y = 15
+
+if y is 15 {
+
+    print $y = 15
+}
+
+bool check_boolean = x is y
+
+if check_boolean is false {
+
+    print !nis false
+}
+
+if check_boolean is true {
+
+    print !nis true
+}
+
 ```
 
 **Supports operations:**
