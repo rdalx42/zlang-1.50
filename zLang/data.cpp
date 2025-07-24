@@ -10,6 +10,7 @@
 std::unordered_map<std::string, int> num_vars;
 std::unordered_map<std::string, bool> bool_vars;
 std::unordered_map<std::string, std::string> string_vars;
+std::unordered_map<std::string, std::string> fn_contents;
 
 int get_num_val(std::string& name){
     auto it = num_vars.find(name);
