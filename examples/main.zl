@@ -1,5 +1,5 @@
 
--- this is an examples
+-- this is an example
 
 fn foo {
   nr x = 5
@@ -13,8 +13,11 @@ fn foo {
 
 fire foo
 
+
 print this is the main.zl file
 
--- run a new file from the same dir
+-- run a new file from the same dir after short delay.
+
+wait 5
 
 run greet.zl
