@@ -7,7 +7,7 @@
 #include "data.h"
 #include "statemenets.h"
 #include "functionalities.h"
-
+#include <fstream>
 
 void proccess_line(std::string& x, int& line_indx) {
     std::stringstream ss(x);
@@ -192,7 +192,35 @@ void proccess_line(std::string& x, int& line_indx) {
             std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
         }
 
-    } else {
+    } else if(start_keyword == "run"){
+        std::string filename;
+        ss>>filename;
+
+        if (filename.size() < 4 || filename.substr(filename.size() - 3) != ".zl") {
+            std::cout << "ONLY FILES WITH .zl EXTENSION CAN BE RUN\n";
+            return;
+        }
+
+        std::ifstream runfile(filename);
+
+        if (!runfile) {
+            std::cout << "FAILED TO OPEN FILE: " << filename << "\n";
+            return;
+        }
+
+        std::string temp_zlang_input[MAXDIM];
+        int temp_lines = 0;
+
+        std::string line;
+        while (std::getline(runfile, line)) {
+            temp_zlang_input[temp_lines++] = line;
+        }
+
+        for (int i = 0; i < temp_lines; ++i) {
+            remove_whitespace(temp_zlang_input[i]);
+            proccess_line(temp_zlang_input[i], i);
+        }
+    }else {
         std::string op, z, Z, Y;
         ss >> op >> z >> Z >> Y;
 
