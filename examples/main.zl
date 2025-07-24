@@ -1,1 +1,20 @@
 
+-- this is an examples
+
+fn foo {
+  nr x = 5
+  if x is 5 {
+    x += 1
+    if x is 6 {
+      print x is 6 !n
+    }
+  }
+}
+
+fire foo
+
+print this is the main.zl file
+
+-- run a new file in the same dir
+
+run greet.zl
