@@ -7,7 +7,7 @@
 
 #include "input_parse.h"
 
-std::ifstream input("input.cbp");
+std::ifstream input("main.zl");
 
 const char* pattern[] = {
     "@@@@@@@@@@@@@@@@@@@@@",
@@ -24,7 +24,7 @@ const char* pattern[] = {
 };
 
 const int TERMINAL_WIDTH = 80;
-const int SCALE = 3;
+const int SCALE = 1;
 const int DELAY_MS = 1;
 
 void printCharBlock(char c) {
