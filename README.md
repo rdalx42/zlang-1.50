@@ -1,12 +1,14 @@
 # zLang 1.40
 An interpreted WORK IN PROGRESS programming language built with c++.
 
-<img width="180" height="180" alt="zLang_130" src="https://github.com/user-attachments/assets/4430ea5e-be72-426b-a84a-4cbb01f73ea7" />
+<img width="180" height="180" alt="ZL" src="https://github.com/user-attachments/assets/cc84adac-9423-444d-b539-8867bfb8cb21" />
 
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
 zLang follows a very STRICT way of typing, spaces are requiered between every keyword and new keywords must be on different lines.
 The code input is read via fstream and read line by line
+
+runs files with .zl extension
 
 Here are some of its functionalities:
 
