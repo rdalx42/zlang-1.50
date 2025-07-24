@@ -154,6 +154,15 @@ run example.zl
 -- will run example.zl
 ```
 
+**wait specific duration**
+
+```zLang
+
+wait 5
+-- will only run after 5 seconds
+
+print wait completed.
+```
 
 **Supports operations:**
 ```zLang
