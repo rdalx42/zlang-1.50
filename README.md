@@ -129,7 +129,7 @@ if check_boolean is true {
 
 ```
 
-**make functions (they currently dont return anything)**
+**make functions (they currently dont return anything and dont offer support for parameters)**
 
 ```zLang
 
