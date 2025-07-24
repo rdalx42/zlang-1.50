@@ -1,6 +1,3 @@
-
-// sadly i had to do a lotta if statements here, no way around it
-
 #include <string>
 #include <cmath>
 #include <climits>
@@ -11,6 +8,8 @@
 #include "statemenets.h"
 #include "functionalities.h"
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 void proccess_line(std::string& x, int& line_indx) {
     std::stringstream ss(x);
@@ -223,6 +222,28 @@ void proccess_line(std::string& x, int& line_indx) {
             remove_whitespace(temp_zlang_input[i]);
             proccess_line(temp_zlang_input[i], i);
         }
+    } else if (start_keyword == "wait") {
+        std::string x;
+        ss >> x;
+
+        int wait_time = 0;
+
+        if (is_num(x)) {
+            wait_time = std::stoi(x);
+        } else if (num_vars.find(x) != num_vars.end()) {
+            wait_time = num_vars[x];
+        } else {
+            std::cout << "INVALID WAIT TIME OR VARIABLE NOT FOUND\n";
+            return;
+        }
+
+        if (wait_time < 0 || wait_time > 3600) {
+            std::cout << "WAIT TIME OUT OF RANGE (0-3600)\n";
+            return;
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+
     }else {
         std::string op, z, Z, Y;
         ss >> op >> z >> Z >> Y;
