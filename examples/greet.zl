@@ -1,0 +1,4 @@
+
+-- will be called when run greet.zl
+
+print hello
