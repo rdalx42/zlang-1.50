@@ -7,6 +7,7 @@
 extern std::unordered_map<std::string, int> num_vars;
 extern std::unordered_map<std::string, std::string> string_vars;
 extern std::unordered_map<std::string, bool> bool_vars;
+extern std::unordered_map<std::string,std::string>fn_contents;
 
 int get_num_val(std::string& name);
 
