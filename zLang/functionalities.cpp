@@ -6,20 +6,18 @@
 #include "input_parse.h"
 #include "data.h"
 #include "statemenets.h"
+#include "functionalities.h"
 
-void proccess_line(std::string& x) {
-    line_indx++;
+
+void proccess_line(std::string& x, int& line_indx) {
     std::stringstream ss(x);
-    std::string start_keyword, name, eq, op, v, y, z;
-
+    std::string start_keyword;
     ss >> start_keyword;
 
     if (start_keyword == "nr") {
+        std::string name, eq, v, y, z;
         ss >> name >> eq >> v;
-        if (!(ss >> y >> z)) {
-            y = "";
-            z = "";
-        }
+        if (!(ss >> y >> z)) y = z = "";
 
         if (is_variable(name)) {
             std::cout << "VARIABLE ALREADY EXISTS";
@@ -32,19 +30,15 @@ void proccess_line(std::string& x) {
                 num_vars[name] = val;
             } else {
                 std::cout << "NR VALUE EXCEEDS LIMIT\n";
-                return;
             }
         } else {
             std::cout << "NR COULDN'T BE DECLARED\n";
-            return;
         }
-    } else if (start_keyword == "bool") {
-        ss >> name >> eq >> v;
 
-        if (!(ss >> y >> z)) {
-            y = "";
-            z = "";
-        }
+    } else if (start_keyword == "bool") {
+        std::string name, eq, v, y, z;
+        ss >> name >> eq >> v;
+        if (!(ss >> y >> z)) y = z = "";
 
         if (is_variable(name)) {
             std::cout << "VARIABLE ALREADY EXISTS";
@@ -52,20 +46,14 @@ void proccess_line(std::string& x) {
         }
 
         if (!name.empty() && eq == "=") {
-            if (v == "true") {
-                bool_vars[name] = true;
-            } else if (v == "false") {
-                bool_vars[name] = false;
-            } else if (bool_vars.find(v) != bool_vars.end()) {
-                // Assign from another bool variable
-                bool_vars[name] = bool_vars[v];
-            } else {
-                bool_vars[name]=bool_statement(v,y,z);
-            }
+            if (v == "true") bool_vars[name] = true;
+            else if (v == "false") bool_vars[name] = false;
+            else if (bool_vars.find(v) != bool_vars.end()) bool_vars[name] = bool_vars[v];
+            else bool_vars[name] = bool_statement(v, y, z);
         } else {
             std::cout << "BOOL COULDN'T BE DECLARED\n";
-            return;
         }
+
     } else if (start_keyword == "print") {
         std::string line;
         std::getline(ss, line);
@@ -83,13 +71,12 @@ void proccess_line(std::string& x) {
             if (line[i] == '$') {
                 std::string varname;
                 ++i;
-                while (i < line.size() && !isspace(line[i])) {
-                    varname += line[i++];
-                }
+                while (i < line.size() && !isspace(line[i])) varname += line[i++];
                 if (is_variable(varname)) {
-                    if (get_var_type(varname) == "string type") std::cout << string_vars[varname];
-                    else if (get_var_type(varname) == "bool type")std::cout<<bool_vars[varname];
-                    else if (get_var_type(varname) == "num type") std::cout << num_vars[varname];
+                    std::string type = get_var_type(varname);
+                    if (type == "string type") std::cout << string_vars[varname];
+                    else if (type == "bool type") std::cout << bool_vars[varname];
+                    else if (type == "num type") std::cout << num_vars[varname];
                 } else {
                     std::cout << '$' << varname;
                 }
@@ -97,89 +84,122 @@ void proccess_line(std::string& x) {
                 std::cout << line[i++];
             }
         }
+
     } else if (start_keyword == "toinput") {
-        ss >> z;
-        if (is_variable(z)) {
-            set_variable(z, program_input[current_zlang_input_line]);
+        std::string var;
+        ss >> var;
+        if (is_variable(var)) {
+            set_variable(var, program_input[current_zlang_input_line]);
             ++current_zlang_input_line;
         } else {
             std::cout << "COULDNT ASSIGN READ VALUE TO NON EXISTENT VARIABLE\n";
         }
-    }else if(start_keyword == "--"){
+
+    } else if (start_keyword == "--") {
         return;
-    }else if(start_keyword == "if"){
-        std::string Z,Y,OpenParem;
-        ss >> z >> Z >> Y >> OpenParem;
 
-        // here we have to parse the if statement
+    } else if (start_keyword == "if") {
+        std::string z, op, y, brace;
+        ss >> z >> op >> y >> brace;
+        bool condition = bool_statement(z, op, y);
+        int depth = 0;
+        bool found_block = false;
 
-        if(bool_statement(z,Z,Y) == false){
-
-            // skip false if
-
-            //int depth = 0;
-            //std::string content = "";
-            //std::cout<<line_indx<<"\n";
-            for(int i = line_indx;i<lines; ++ line_indx){
-               // std::cout<<progr
-             //   if(zlang_input[i].find("{")!=std::string::npos){depth++;}
-              //  if(zlang_input[i].find("}")!=std::string::npos){depth--;}
-
-                //content+=zlang_input[i];
-                line_indx=i;
-            }std::cout<<line_indx<<"\n";
-
-        } else if (start_keyword == "if") {
-            std::string Z, Y, OpenBrace;
-            ss >> z >> Z >> Y >> OpenBrace;
-
-            bool condition = bool_statement(z, Z, Y);
-
-            int depth = 0;
-            bool started = false;
-
+        if (!condition) {
             for (int i = line_indx; i < lines; ++i) {
                 std::string line = zlang_input[i];
-
                 if (line.find("{") != std::string::npos) {
                     depth++;
-                    started = true;
-                    continue; // Skip the opening brace
+                    found_block = true;
                 }
-
-                if (line.find("}") != std::string::npos) {
+                if (line.find("}") != std::string::npos && found_block) {
                     depth--;
                     if (depth == 0) {
-                        line_indx = i + 1; // Advance to the line after block
-                        break;
+                        line_indx = i + 1;
+                        return;
                     }
-                    continue; // Skip the closing brace
                 }
-
-                if (started && depth > 0) {
-                    if (condition) {
-                        proccess_line(line);
+            }
+            return;
+        } else {
+            for (int i = line_indx; i < lines; ++i) {
+                std::string line = zlang_input[i];
+                if (line.find("{") != std::string::npos) {
+                    depth++;
+                    found_block = true;
+                    continue;
+                }
+                if (line.find("}") != std::string::npos && found_block) {
+                    depth--;
+                    if (depth == 0) {
+                        line_indx = i + 1;
+                        return;
                     }
+                    continue;
+                }
+                if (found_block && depth > 0) {
+                    proccess_line(line, i);
                 }
             }
         }
 
-    }else {
-        ss >> op >> z;
-        std::string Z,Y;
-        ss >> Z >> Y;
+    } else if (start_keyword == "fn") {
+        std::string name, open;
+        ss >> name >> open;
 
-        if (get_var_type(start_keyword)=="num type"){
-            num_vars[start_keyword] = operation_statement(z,Z,Y);
+        std::string fn_content = "";
+        int depth = 0;
+        bool started = false;
+
+        for (int i = line_indx + 1; i < lines; ++i) {
+            std::string line = zlang_input[i];
+
+            if (line.find("{") != std::string::npos) {
+                depth++;
+                started = true;
+                continue;
+            }
+
+            if (line.find("}") != std::string::npos && started) {
+                depth--;
+                if (depth == 0) {
+                    line_indx = i + 1;
+                    break;
+                }
+                continue;
+            }
+
+            if (started && depth > 0) {
+                fn_content += line + "\n";
+            }
         }
 
-        // only a bool or an if statement can have a bool_statement
+        fn_contents[name] = fn_content;
 
-        if(get_var_type(start_keyword) == "bool type"){
+    } else if (start_keyword == "fire") {
+        std::string fn_name;
+        ss >> fn_name;
 
-            bool_vars[start_keyword]=bool_statement(z,Z,Y);
 
+        if (fn_contents.find(fn_name) != fn_contents.end()) {
+            std::stringstream fn_stream(fn_contents[fn_name]);
+            std::string line;
+            int dummy_line = 0;
+            while (std::getline(fn_stream, line)) {
+                proccess_line(line, dummy_line);
+            }
+        } else {
+            std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
+        }
+
+    } else {
+        std::string op, z, Z, Y;
+        ss >> op >> z >> Z >> Y;
+
+        if (get_var_type(start_keyword) == "num type") {
+            num_vars[start_keyword] = operation_statement(z, Z, Y);
+        } else if (get_var_type(start_keyword) == "bool type") {
+            bool_vars[start_keyword] = bool_statement(z, Z, Y);
         }
     }
-
 }
