@@ -127,6 +127,32 @@ if check_boolean is true {
 
 ```
 
+**make functions (they currently dont return anything)**
+
+```zLang
+
+fn foo {
+ print hi !n
+}
+
+fire foo
+
+```
+
+**run other files**
+
+```zLang
+
+fn foo {
+ print hi !n
+}
+
+fire foo
+run example.zl
+-- will run example.zl
+```
+
+
 **Supports operations:**
 ```zLang
 -=;
