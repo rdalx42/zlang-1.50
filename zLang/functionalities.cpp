@@ -1,3 +1,6 @@
+
+// sadly i had to do a lotta if statements here, no way around it
+
 #include <string>
 #include <cmath>
 #include <climits>
