@@ -8,6 +8,7 @@
 #include "input_parse.h"
 
 std::ifstream input("main.zl");
+std::ifstream zlinput("input.txt");
 
 const char* pattern[] = {
     "@@@@@@@@@@@@@@@@@@@@@",
@@ -92,21 +93,25 @@ int main(void) {
     std::cout << "\n======== [WRITE PROGRAM INPUT - PRESS CTRL + C AND ENTER TO FINISH] ========\n";
 
     std::string ln;
+
+    while(std::getline(zlinput,ln)){
+        program_input[input_lines]=ln;
+        ++input_lines;
+    }
+
+    ln = "";
+
     while (std::getline(input, ln)) {
         zlang_input[lines] = ln;
         ++lines;
     }
 
-    std::string word;
-    while (std::cin >> word) {
-        program_input[input_lines] = word;
-        ++input_lines;
-    }
-
     std::cout << "\n======== [CODE INPUT] ========\n\n";
+
     output_program_input();
 
     std::cout << "\n======== [ZLANG OUTPUT] ========\n";
+
     RUN_ZLANG();
 
     std::cout << "\n======== [INPUT LINES: " << lines << "]========\n";
