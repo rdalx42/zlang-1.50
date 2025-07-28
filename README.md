@@ -1,4 +1,4 @@
-# zLang 1.40
+# zLang 1.50
 An interpreted WORK IN PROGRESS programming language built with c++.
 
 <img width="180" height="180" alt="logo" src="https://github.com/user-attachments/assets/b5fb8bff-e3c8-4d8e-a852-a224cf935272" />
