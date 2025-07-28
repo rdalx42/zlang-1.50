@@ -133,7 +133,7 @@ if check_boolean is true {
 
 ```zLang
 
-fn foo : boolean{
+fn foo : boolean {
  if boolean is true {
   print is true
  }
