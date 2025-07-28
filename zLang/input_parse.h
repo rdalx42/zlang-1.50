@@ -17,6 +17,6 @@ void remove_whitespace(std::string& x);
 void output_input();
 void output_program_input();
 
+bool is_bool(std::string& x);
 bool is_num(std::string& x);
-
 #endif // INPUT_PARSE_H
