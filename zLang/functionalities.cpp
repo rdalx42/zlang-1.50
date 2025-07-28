@@ -221,7 +221,9 @@ void proccess_line(std::string& x, int& line_indx) {
             std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
         }
 
-    } else if(start_keyword == "run"){
+    }else if(start_keyword == "clear"){
+        system("cls");
+    }else if(start_keyword == "run"){
         std::string filename;
         ss>>filename;
 
