@@ -11,6 +11,8 @@ std::unordered_map<std::string, int> num_vars;
 std::unordered_map<std::string, bool> bool_vars;
 std::unordered_map<std::string, std::string> string_vars;
 std::unordered_map<std::string, std::string> fn_contents;
+std::unordered_map<std::string, std::vector<std::string>> fn_params;
+
 
 int get_num_val(std::string& name){
     auto it = num_vars.find(name);
@@ -51,6 +53,35 @@ bool is_variable(std::string& name){
     }
     return true;
 }
+
+void set_variable_to_data(std::string& varname, std::string& data_name){
+
+    if(is_num(data_name)){
+        num_vars[varname] = std::stoi(data_name);
+        return;
+    }
+
+    if(num_vars.find(data_name)!=num_vars.end()){
+        num_vars[varname] = num_vars[data_name];
+        return;
+    }
+
+    if(data_name == "true" || data_name == "false"){
+        // no built in cpp function for this.
+        if(data_name == "true"){
+            bool_vars[varname]=true;
+        }else{bool_vars[varname]=false;}
+        return;
+    }
+
+    if(bool_vars.find(data_name)!=bool_vars.end()){
+        bool_vars[varname] = bool_vars[data_name];
+        return;
+    }
+
+    std::cout<<data_name<<" isn't a variable, therefore it cannot be assigned to: "<<varname<<"\n";
+}
+
 void set_variable(std::string& name, std::string& value){
     if(num_vars.find(name) != num_vars.end()){
         if(is_num(value)){
