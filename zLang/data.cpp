@@ -12,7 +12,22 @@ std::unordered_map<std::string, bool> bool_vars;
 std::unordered_map<std::string, std::string> string_vars;
 std::unordered_map<std::string, std::string> fn_contents;
 std::unordered_map<std::string, std::vector<std::string>> fn_params;
+std::unordered_map<std::string, std::string> fn_values;
+int function_read_info_indx=0;
+std::vector<function_read_info>function_read_info_arr;
 
+bool is_datatype(std::string& value){
+    if(is_num(value)){return true;}
+    if(value == "true"||value=="false"){return true;}
+    return true;
+}
+
+int get_function_read_info_arr_indx(std::string& fname){
+    for(int i = 0 ; i < function_read_info_arr.size(); ++ i){
+        if(function_read_info_arr[i].name == fname){return i;}
+    }
+    return -1;
+}
 
 int get_num_val(std::string& name){
     auto it = num_vars.find(name);
