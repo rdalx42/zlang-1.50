@@ -149,11 +149,22 @@ void proccess_line(std::string& x, int& line_indx) {
         std::string name, open;
         ss >> name >> open;
 
+        if (open == ":") {
+
+            std::string param;
+            while (ss >> param) {
+
+                if(param == "{"){break;}
+                fn_params[name].push_back(param);
+
+            }
+        }
+
         std::string fn_content = "";
         int depth = 0;
         bool started = false;
 
-        for (int i = line_indx + 1; i < lines; ++i) {
+        for (int i = line_indx ; i < lines; ++i) {
             std::string line = zlang_input[i];
 
             if (line.find("{") != std::string::npos) {
@@ -179,9 +190,25 @@ void proccess_line(std::string& x, int& line_indx) {
         fn_contents[name] = fn_content;
 
     } else if (start_keyword == "fire") {
-        std::string fn_name;
-        ss >> fn_name;
 
+        std::string fn_name,param_keyword;
+        ss >> fn_name>>param_keyword;
+
+        if (fn_params[fn_name].size() > 0 && param_keyword == ":") {
+            std::string param_value;
+            int param_indx = 0;
+
+            while (param_indx < (int)fn_params[fn_name].size() && ss >> param_value) {
+                std::string& param_name = fn_params[fn_name][param_indx];
+                set_variable_to_data(param_name, param_value);
+                param_indx++;
+            }
+
+            if (param_indx < (int)fn_params[fn_name].size()) {
+                std::cout << "Not enough params when firing function of name: " << fn_name << "\n";
+                return;
+            }
+        }
 
         if (fn_contents.find(fn_name) != fn_contents.end()) {
             std::stringstream fn_stream(fn_contents[fn_name]);
