@@ -129,15 +129,17 @@ if check_boolean is true {
 
 ```
 
-**make functions (they currently dont return anything and dont offer support for parameters)**
+**make functions (they currently dont return anything)**
 
 ```zLang
 
-fn foo {
- print hi !n
+fn foo : boolean{
+ if boolean is true {
+  print is true
+ }
 }
 
-fire foo
+fire foo : true
 
 ```
 
