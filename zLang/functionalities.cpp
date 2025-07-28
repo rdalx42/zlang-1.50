@@ -10,8 +10,23 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <windows.h>
+
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+void set_console_color(int fg, int bg = -1) {
+    if (bg == -1) {
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(hConsole, &csbi);
+        bg = (csbi.wAttributes & 0xF0) >> 4;
+    }
+    SetConsoleTextAttribute(hConsole, (bg << 4) | (fg & 0x0F));
+}
+
+std::string current_fn_name = "";
 
 void proccess_line(std::string& x, int& line_indx) {
+
     std::stringstream ss(x);
     std::string start_keyword;
     ss >> start_keyword;
@@ -22,7 +37,7 @@ void proccess_line(std::string& x, int& line_indx) {
         if (!(ss >> y >> z)) y = z = "";
 
         if (is_variable(name)) {
-            std::cout << "VARIABLE ALREADY EXISTS";
+
             return;
         }
 
@@ -90,8 +105,9 @@ void proccess_line(std::string& x, int& line_indx) {
     } else if (start_keyword == "toinput") {
         std::string var;
         ss >> var;
+
         if (is_variable(var)) {
-            set_variable(var, program_input[current_zlang_input_line]);
+            set_variable_to_data(var, program_input[current_zlang_input_line]);
             ++current_zlang_input_line;
         } else {
             std::cout << "COULDNT ASSIGN READ VALUE TO NON EXISTENT VARIABLE\n";
@@ -99,23 +115,26 @@ void proccess_line(std::string& x, int& line_indx) {
 
     } else if (start_keyword == "--") {
         return;
-
-    } else if (start_keyword == "if") {
+    }else if (start_keyword == "if") {
         std::string z, op, y, brace;
         ss >> z >> op >> y >> brace;
+
         bool condition = bool_statement(z, op, y);
         int depth = 0;
         bool found_block = false;
 
         if (!condition) {
+
             for (int i = line_indx; i < lines; ++i) {
                 std::string line = zlang_input[i];
                 if (line.find("{") != std::string::npos) {
                     depth++;
                     found_block = true;
                 }
+
                 if (line.find("}") != std::string::npos && found_block) {
                     depth--;
+
                     if (depth == 0) {
                         line_indx = i + 1;
                         return;
@@ -149,6 +168,8 @@ void proccess_line(std::string& x, int& line_indx) {
         std::string name, open;
         ss >> name >> open;
 
+        // we have to keep track of the start and end line of the function
+
         if (open == ":") {
 
             std::string param;
@@ -160,6 +181,10 @@ void proccess_line(std::string& x, int& line_indx) {
             }
         }
 
+        function_read_info info;
+        info.name = name;
+        info.start_indx = line_indx;
+
         std::string fn_content = "";
         int depth = 0;
         bool started = false;
@@ -170,16 +195,19 @@ void proccess_line(std::string& x, int& line_indx) {
             if (line.find("{") != std::string::npos) {
                 depth++;
                 started = true;
-                continue;
+
+                if(depth == 1){continue;}
             }
 
             if (line.find("}") != std::string::npos && started) {
                 depth--;
                 if (depth == 0) {
                     line_indx = i + 1;
+                    info.end_indx = line_indx;
+                    function_read_info_arr.push_back(info);
                     break;
                 }
-                continue;
+
             }
 
             if (started && depth > 0) {
@@ -189,10 +217,38 @@ void proccess_line(std::string& x, int& line_indx) {
 
         fn_contents[name] = fn_content;
 
-    } else if (start_keyword == "fire") {
+    }else if(start_keyword == "return"){
 
+        if(current_fn_name == ""){
+            std::cout<<"Cannot return values outside of function\n";
+            return;
+        }
+
+        std::string returnval;
+        ss>>returnval;
+
+        if(returnval == ""){
+            std::cout<<"Return value must not be empty!\n";
+            return;
+        }
+
+        if(!is_datatype(returnval)){
+           std::cout<<"Cannot return non-existent data type value!\n";
+           return;
+        }
+
+        if(fn_values[current_fn_name].empty()){
+            std::cout<<returnval;
+            fn_values[current_fn_name] = returnval;
+        }
+
+    }else if (start_keyword == "fire") {
+
+        fn_values[current_fn_name] = "";
         std::string fn_name,param_keyword;
         ss >> fn_name>>param_keyword;
+
+        int fn_indx = get_function_read_info_arr_indx(fn_name);
 
         if (fn_params[fn_name].size() > 0 && param_keyword == ":") {
             std::string param_value;
@@ -211,12 +267,12 @@ void proccess_line(std::string& x, int& line_indx) {
         }
 
         if (fn_contents.find(fn_name) != fn_contents.end()) {
-            std::stringstream fn_stream(fn_contents[fn_name]);
-            std::string line;
-            int dummy_line = 0;
-            while (std::getline(fn_stream, line)) {
-                proccess_line(line, dummy_line);
+
+            for(int i = function_read_info_arr[fn_indx].start_indx+1; i < function_read_info_arr[fn_indx].end_indx-1;++i){
+                remove_whitespace(zlang_input[i]);
+                proccess_line(zlang_input[i],i);
             }
+
         } else {
             std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
         }
@@ -273,6 +329,25 @@ void proccess_line(std::string& x, int& line_indx) {
 
         std::this_thread::sleep_for(std::chrono::seconds(wait_time));
 
+    }else if (start_keyword == "color") {
+        std::string mode;
+        ss >> mode;
+
+        if (mode == "fg") {
+            int fg;
+            ss >> fg;
+            set_console_color(fg);
+        } else if (mode == "bg") {
+            int bg;
+            ss >> bg;
+            set_console_color(7, bg);
+        } else if (mode == "both") {
+            int fg, bg;
+            ss >> fg >> bg;
+            set_console_color(fg, bg);
+        } else {
+            std::cout << "INVALID COLOR MODE. USE: fg, bg, or both\n";
+        }
     }else {
         std::string op, z, Z, Y;
         ss >> op >> z >> Z >> Y;
