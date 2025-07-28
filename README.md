@@ -1,7 +1,7 @@
 # zLang 1.40
 An interpreted WORK IN PROGRESS programming language built with c++.
 
-<img width="180" height="180" alt="ZL" src="https://github.com/user-attachments/assets/cc84adac-9423-444d-b539-8867bfb8cb21" />
+<img width="180" height="180" alt="logo" src="https://github.com/user-attachments/assets/b5fb8bff-e3c8-4d8e-a852-a224cf935272" />
 
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
