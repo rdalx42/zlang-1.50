@@ -4,6 +4,7 @@
 #include <string>
 
 void manage_statement();
-void proccess_line(std::string& x);
+void proccess_line(std::string& x, int& indx);
+void set_console_color(int fg, int bg);
 
 #endif
