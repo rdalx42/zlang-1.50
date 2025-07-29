@@ -1,23 +1,22 @@
 
 -- this is an example
 
-fn foo {
-  nr x = 5
+fn foo : x {
   if x is 5 {
     x += 1
     if x is 6 {
-      print x is 6 !n
+      return 5
     }
   }
 }
 
-fire foo
-
+fire foo : 5
+bool fooResult = :foo
 
 print this is the main.zl file
 
--- run a new file from the same dir after short delay.
+print $fooResult
 
 wait 5
 
-run greet.zl
+print program ended!
