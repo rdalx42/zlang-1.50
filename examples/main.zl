@@ -11,9 +11,9 @@ fn foo : x {
 }
 
 fire foo : 5
-bool fooResult = :foo
+nr fooResult = :foo
 
-print this is the main.zl file
+print this is the main.zl file !n
 
 print $fooResult
 
