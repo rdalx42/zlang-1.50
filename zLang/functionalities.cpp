@@ -37,7 +37,6 @@ void proccess_line(std::string& x, int& line_indx) {
         if (!(ss >> y >> z)) y = z = "";
 
         if (is_variable(name)) {
-
             return;
         }
 
@@ -165,9 +164,10 @@ void proccess_line(std::string& x, int& line_indx) {
         }
 
     } else if (start_keyword == "fn") {
+
         std::string name, open;
         ss >> name >> open;
-
+        current_fn_name = name;
         // we have to keep track of the start and end line of the function
 
         if (open == ":") {
@@ -238,7 +238,6 @@ void proccess_line(std::string& x, int& line_indx) {
         }
 
         if(fn_values[current_fn_name].empty()){
-            std::cout<<returnval;
             fn_values[current_fn_name] = returnval;
         }
 
@@ -268,10 +267,14 @@ void proccess_line(std::string& x, int& line_indx) {
 
         if (fn_contents.find(fn_name) != fn_contents.end()) {
 
+            current_fn_name=fn_name;
+
             for(int i = function_read_info_arr[fn_indx].start_indx+1; i < function_read_info_arr[fn_indx].end_indx-1;++i){
                 remove_whitespace(zlang_input[i]);
                 proccess_line(zlang_input[i],i);
             }
+
+            current_fn_name="";
 
         } else {
             std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
@@ -279,35 +282,7 @@ void proccess_line(std::string& x, int& line_indx) {
 
     }else if(start_keyword == "clear"){
         system("cls");
-    }else if(start_keyword == "run"){
-        std::string filename;
-        ss>>filename;
-
-        if (filename.size() < 4 || filename.substr(filename.size() - 3) != ".zl") {
-            std::cout << "ONLY FILES WITH .zl EXTENSION CAN BE RUN\n";
-            return;
-        }
-
-        std::ifstream runfile(filename);
-
-        if (!runfile) {
-            std::cout << "FAILED TO OPEN FILE: " << filename << "\n";
-            return;
-        }
-
-        std::string temp_zlang_input[MAXDIM];
-        int temp_lines = 0;
-
-        std::string line;
-        while (std::getline(runfile, line)) {
-            temp_zlang_input[temp_lines++] = line;
-        }
-
-        for (int i = 0; i < temp_lines; ++i) {
-            remove_whitespace(temp_zlang_input[i]);
-            proccess_line(temp_zlang_input[i], i);
-        }
-    } else if (start_keyword == "wait") {
+    }else if (start_keyword == "wait") {
         std::string x;
         ss >> x;
 
