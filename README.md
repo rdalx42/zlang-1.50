@@ -5,10 +5,7 @@ An interpreted WORK IN PROGRESS programming language built with c++.
 
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
-zLang follows a very STRICT way of typing, spaces are requiered between every keyword and new keywords must be on different lines.
-The code input is read via fstream and read line by line
-
-runs files with .zl extension
+runs file with .zl extension
 
 Here are some of its functionalities:
 
@@ -129,32 +126,25 @@ if check_boolean is true {
 
 ```
 
-**make functions (they currently dont return anything)**
+**make functions**
 
 ```zLang
 
 fn foo : boolean {
  if boolean is true {
-  print is true
+  return true
  }
 }
 
 fire foo : true
 
-```
-
-**run other files**
-
-```zLang
-
-fn foo {
- print hi !n
+bool fooAns = :foo
+if fooAns is true {
+ print function is true !
 }
 
-fire foo
-run example.zl
--- will run example.zl
 ```
+
 
 **wait specific duration**
 
@@ -164,6 +154,30 @@ wait 5
 -- will only run after 5 seconds
 
 print wait completed.
+```
+
+**Change console color**
+
+```zLang
+-- Set foreground color to light green (2)
+color fg 2
+
+-- Wait for 2 seconds to let user see the effect
+wait 2
+
+-- Set background color to blue (1) and keep foreground white (7)
+color bg 1
+
+wait 2
+
+-- Set both foreground and background (red on yellow)
+color both 4 6
+
+wait 2
+
+-- Reset to default (white on black)
+color both 7 0
+
 ```
 
 **Supports operations:**
