@@ -13,10 +13,13 @@ extern int input_lines;
 extern int current_zlang_input_line;
 
 void RUN_ZLANG();
+void clean_program_input();
 void remove_whitespace(std::string& x);
 void output_input();
 void output_program_input();
 
 bool is_bool(std::string& x);
 bool is_num(std::string& x);
-#endif // INPUT_PARSE_H
+bool is_fn_value(std::string& x);
+
+#endif
