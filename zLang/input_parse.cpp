@@ -48,6 +48,7 @@ void RUN_ZLANG() {
 void clean_program_input() {
 
     // clean up lines so the interpreter can use sstream to read input.
+    // TODO: when adding strings make sure you don't sepparate expressions in strings.
 
     for (int l = 0; l < lines; ++l) {
         std::string current_ln = zlang_input[l];
