@@ -145,6 +145,19 @@ if fooAns is true {
 
 ```
 
+**while loop**
+
+```zLang
+
+nr x = 0
+
+while x < 50 {
+
+ x = x + 1
+ print $x !n
+}
+```
+
 
 **wait specific duration**
 
@@ -152,8 +165,12 @@ if fooAns is true {
 
 wait 5
 -- will only run after 5 seconds
+print wait completed in seconds
+waitms 5
 
-print wait completed.
+-- will run after 5 miliseconds
+
+print wait completed in miliseconds
 ```
 
 **Change console color**
