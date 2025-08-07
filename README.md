@@ -145,7 +145,7 @@ if fooAns is true {
 
 ```
 
-**while loop**
+**while loops**
 
 ```zLang
 
