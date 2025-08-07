@@ -103,6 +103,78 @@ void skip_if_block(int& line_indx) {
     }
 }
 
+void handle_while(std::stringstream& ss, int& line_indx) {
+    std::string left, op, right, brace;
+
+    ss >> left;
+
+    std::string next_token;
+    if (!(ss >> next_token)) {
+        std::cout << "Syntax error: expected condition or '{' after while\n";
+        return;
+    }
+
+    if (next_token == "{") {
+        op = "";
+        right = "";
+        brace = "{";
+    } else {
+        op = next_token;
+
+        if (!(ss >> right)) {
+            std::cout << "Syntax error: expected right operand or '{' after operator\n";
+            return;
+        }
+
+        if (!(ss >> brace)) {
+            std::cout << "Syntax error: expected '{' after condition\n";
+            return;
+        }
+
+        if (brace != "{") {
+            std::cout << "Syntax error: expected '{' after condition in while\n";
+            return;
+        }
+    }
+
+    int block_start = line_indx + 1;
+    int block_end = -1;
+    int depth = 0;
+
+    for (int i = block_start; i < lines; ++i) {
+        const std::string& line = zlang_input[i];
+        if (line.find("{") != std::string::npos) depth++;
+        if (line.find("}") != std::string::npos) {
+            if (depth == 0) {
+                block_end = i;
+                break;
+            } else {
+                depth--;
+            }
+        }
+    }
+
+    if (block_end == -1) {
+        std::cout << "Syntax error: could not find matching '}' for while\n";
+        return;
+    }
+
+    auto condition_true = [&]() -> bool {
+        if (op.empty()) {
+            return bool_statement(left, "is", "true");
+        }
+        return bool_statement(left, op, right);
+    };
+
+    while (condition_true()) {
+        for (int i = block_start; i < block_end; ++i) {
+            proccess_line(zlang_input[i], i);
+        }
+    }
+
+    line_indx = block_end + 1;
+}
+
 void handle_if(std::stringstream& ss, int& line_indx) {
     std::string left, op, right, brace;
     ss >> left >> op >> right >> brace;
@@ -209,6 +281,14 @@ void handle_function_fire(std::stringstream& ss) {
     current_fn_name = "";
 }
 
+void waitms(int ms) {
+    if (ms < 0 || ms > 3600000) {
+        std::cout << "WAITMS TIME OUT OF RANGE (0–3600000)\n";
+    } else {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    }
+}
+
 void proccess_line(std::string& x, int& line_indx) {
     std::stringstream ss(x);
     std::string keyword;
@@ -229,7 +309,9 @@ void proccess_line(std::string& x, int& line_indx) {
         return;
     } else if (keyword == "if") {
         handle_if(ss, line_indx);
-    } else if (keyword == "fn") {
+    } else if(keyword == "while"){
+        handle_while(ss,line_indx);
+    }else if (keyword == "fn") {
         handle_function_def(ss, line_indx);
     } else if (keyword == "return") {
         std::string value;
@@ -256,6 +338,11 @@ void proccess_line(std::string& x, int& line_indx) {
         } else {
             std::this_thread::sleep_for(std::chrono::seconds(wait_time));
         }
+    } else if (keyword == "waitms") {
+        std::string ms_str;
+        ss >> ms_str;
+        int wait_time = is_num(ms_str) ? std::stoi(ms_str) : num_vars[ms_str];
+        waitms(wait_time);
     } else if (keyword == "color") {
         std::string mode;
         int fg = 7, bg = -1;
@@ -265,7 +352,7 @@ void proccess_line(std::string& x, int& line_indx) {
         else if (mode == "both") ss >> fg >> bg;
         else std::cout << "INVALID COLOR MODE. USE: fg, bg, or both\n";
         set_console_color(fg, bg);
-    } else {
+    }  else {
         std::string op, z, Z, Y;
         ss >> op >> z >> Z >> Y;
         std::string type = get_var_type(keyword);
