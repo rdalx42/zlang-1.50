@@ -18,15 +18,11 @@ std::vector<std::string> space_tokens = {
     "-",
     "/",
     "*",
-    "return",
-    "color",
-    "is",
-    "isnt",
-    "true",
-    "false",
     ":",
     "{",
     "}",
+    "\"",
+    "'",
 };
 
 void remove_whitespace(std::string& x) {
@@ -46,25 +42,64 @@ void RUN_ZLANG() {
 }
 
 void clean_program_input() {
-
-    // clean up lines so the interpreter can use sstream to read input.
-    // TODO: when adding strings make sure you don't sepparate expressions in strings.
-
     for (int l = 0; l < lines; ++l) {
         std::string current_ln = zlang_input[l];
+        std::string cleaned_line;
+        bool in_string = false;
+        char string_delim = '\0';
 
-        for (const std::string& token : space_tokens) {
-            size_t pos = 0;
-            while ((pos = current_ln.find(token, pos)) != std::string::npos) {
-                if (pos == 0 || current_ln[pos - 1] != ' ')
-                    current_ln.insert(pos, " "), ++pos;
-                pos += token.length();
-                if (pos >= current_ln.size() || current_ln[pos] != ' ')
-                    current_ln.insert(pos, " ");
+        for (size_t i = 0; i < current_ln.size(); ++i) {
+            char c = current_ln[i];
+            if(c == ','){c = ' ';}
+            if ((c == '"' || c == '\'') && (i == 0 || current_ln[i - 1] != '\\')) {
+                if (!in_string) {
+
+                    if (!cleaned_line.empty() && cleaned_line.back() != ' ')
+                        cleaned_line += ' ';
+                    cleaned_line += c;
+                    in_string = true;
+                    string_delim = c;
+
+                    if (i + 1 < current_ln.size() && current_ln[i + 1] != ' ')
+                        cleaned_line += ' ';
+                } else if (c == string_delim) {
+
+                    if (!cleaned_line.empty() && cleaned_line.back() != ' ')
+                        cleaned_line += ' ';
+                    cleaned_line += c;
+                    in_string = false;
+                    string_delim = '\0';
+                    if (i + 1 < current_ln.size() && current_ln[i + 1] != ' ')
+                        cleaned_line += ' ';
+                }
+                continue;
             }
+
+            if (in_string) {
+                cleaned_line += c;
+                continue;
+            }
+
+            bool matched_token = false;
+            for (const std::string& token : space_tokens) {
+                size_t token_len = token.length();
+                if (current_ln.compare(i, token_len, token) == 0) {
+                    if (!cleaned_line.empty() && cleaned_line.back() != ' ')
+                        cleaned_line += ' ';
+                    cleaned_line += token;
+                    if (i + token_len < current_ln.size() && current_ln[i + token_len] != ' ')
+                        cleaned_line += ' ';
+                    i += token_len - 1;
+                    matched_token = true;
+                    break;
+                }
+            }
+
+            if (!matched_token)
+                cleaned_line += c;
         }
 
-        zlang_input[l] = current_ln;
+        zlang_input[l] = cleaned_line;
     }
 }
 
