@@ -199,14 +199,20 @@ color both 7 0
 
 **Supports operations:**
 ```zLang
--=;
-+=;
-/=;
-*=;
-%=;
+-=
++=
+/=
+*=
+%=
 &=  
 |=  
 ^=  
 <<= 
 >>= 
 ```
+
+**What's next (zLang 1.60+)?**
+
+*The zLang interpreter will be way faster accessing variables in O(1) time*
+
+*zLang will feature support for global variables and strings alongside with support for multiple files*
