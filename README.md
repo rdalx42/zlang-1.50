@@ -1,8 +1,7 @@
-# zLang 1.50
+# zLang 1.50+
 An interpreted WORK IN PROGRESS programming language built with c++.
 
-<img width="180" height="180" alt="logo" src="https://github.com/user-attachments/assets/b5fb8bff-e3c8-4d8e-a852-a224cf935272" />
-
+<img width="180" height="180" alt="Zlang Version 1.50+" src="https://github.com/user-attachments/assets/bcd7b942-b35b-46fd-90a9-0ef1d72c3a09" />
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
 runs file with .zl extension
@@ -16,18 +15,6 @@ Current types: nr [Number], bool [Boolean]
 ```zLang
 nr x = 69
 -- This is a comment
-```
-
-**Increment/decrement Variables**
-
-```zLang
-nr x = 10
-nr y = x / 10
-
-y += x
-y += 1
-x -= y
-x -= 5
 ```
 
 **IO**
@@ -76,7 +63,7 @@ print $y !n
 **Print new lines**
 
 ```zlang 
-print Hello !n World !n NewLine
+print Hello !n World \n NewLine
 ```
 --> Will output
 
@@ -84,20 +71,6 @@ print Hello !n World !n NewLine
 Hello
  World
   NewLine
-```
-
-**Use basic true/false expressions**
-
-```zLang
--- here x will be false
-bool x = 5 is 6
-
--- here x will be true
-x = 5 isnt 6
-
--- this works for: >=,<=,>,< operators.
-
-print $x
 ```
 
 **Use basic if statements**
@@ -197,26 +170,9 @@ color both 7 0
 
 ```
 
-**Supports operations:**
-```zLang
--=
-+=
-/=
-*=
-%=
-&=  
-|=  
-^=  
-<<= 
->>= 
-```
 
 **What's next (zLang 1.60+)?**
 
-*Each zLang program will have its own variable ecosystem*
-
-
 *The import keyword will be added*
-
 
 *zLang will feature support for global variables and strings alongside with support for multiple files*
