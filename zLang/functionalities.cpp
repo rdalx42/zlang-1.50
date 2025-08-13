@@ -51,20 +51,20 @@ void handle_nr(std::stringstream& ss, const std::string& filename)
 
 void handle_bool(std::stringstream& ss, const std::string& filename)
 {
-    std::string name, eq, expr, extra;
-    ss >> name >> eq >> expr;
-    std::getline(ss, extra);
+    std::string name, eq, expr, extra, extra2;
+    ss >> name >> eq >> expr >> extra >> extra2;
+    
     if (program_data[get_index(filename)].name_to_indx.find(name) != program_data[get_index(filename)].name_to_indx.end())
         return;
     if (!name.empty() && eq == "=")
     {
         bool result = false;
-        if (expr == "true")
+        if (expr == "true"&&extra.empty() && extra2.empty())
             result = true;
-        else if (expr == "false")
+        else if (expr == "false"&&extra.empty() && extra2.empty())
             result = false;
         else
-            result = bool_statement(expr, "", "", filename);
+            result = bool_statement(expr, extra, extra2, filename);
         program_data[get_index(filename)].add_variable(name, false, "bool type", result ? "true" : "false");
     }
     else
@@ -420,14 +420,20 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
     }else if (token == "return")
     {
         std::string value;
+        std::string filename_non_const = filename;
         ss >> value;
         if (current_fn_name.empty())
             std::cout << "Return not allowed outside function\n";
         else if (value.empty())
             std::cout << "Return value cannot be empty!\n";
-        else if (!is_datatype(value))
+        else if (!is_datatype(value,filename_non_const))
             std::cout << "Invalid return datatype!\n";
         else if (program_data[get_index(filename)].fn_values[current_fn_name].empty())
+            if(!is_num(value)&&!is_bool(value))
+            {
+                value=program_data[get_index(filename)].values[program_data[get_index(filename)].name_to_indx[value]].value;
+            }
+                
             program_data[get_index(filename)].fn_values[current_fn_name] = value;
     }
     else if (token == "fire")
