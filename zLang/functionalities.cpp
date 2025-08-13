@@ -3,18 +3,25 @@
 #include <iostream>
 #include <climits>
 #include <chrono>
+#include <fstream>
 #include <thread>
+#include <cstdlib>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "input_parse.h"
 #include "data.h"
-#include "statemenets.h"
+#include "input_parse.h"
+#include "statements.h"
 #include "functionalities.h"
+
+#pragma GCC optimize("O3", "unroll-loops", "fast-math")
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 std::string current_fn_name = "";
 
-void set_console_color(int fg, int bg = -1) {
-    if (bg == -1) {
+void set_console_color(int fg, int bg)
+{
+    if (bg == -1)
+    {
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         GetConsoleScreenBufferInfo(hConsole, &csbi);
         bg = (csbi.wAttributes & 0xF0) >> 4;
@@ -22,80 +29,102 @@ void set_console_color(int fg, int bg = -1) {
     SetConsoleTextAttribute(hConsole, (bg << 4) | (fg & 0x0F));
 }
 
-void handle_nr(std::stringstream& ss) {
-    std::string name, eq, v, y = "", z = "";
-    ss >> name >> eq >> v >> y >> z;
-
-    if (is_variable(name)) return;
-    if (!name.empty() && eq == "=") {
-        int val = y.empty() ? operation_statement(v, "", "") : operation_statement(v, y, z);
-        if (val < INT_MAX && val >= INT_MIN) {
-            num_vars[name] = val;
-        } else {
-            std::cout << "NR VALUE EXCEEDS LIMIT\n";
-        }
-    } else {
-        std::cout << "NR COULDN'T BE DECLARED\n";
-    }
-}
-
-void handle_bool(std::stringstream& ss) {
-    std::string name, eq, v, y = "", z = "";
-    ss >> name >> eq >> v >> y >> z;
-
-    if (is_variable(name)) {
-        std::cout << "VARIABLE ALREADY EXISTS\n";
+void handle_nr(std::stringstream& ss, const std::string& filename)
+{
+    std::string name, eq, expr, extra;
+    ss >> name >> eq >> expr;
+    
+    std::getline(ss, extra);
+    if (program_data[get_index(filename)].name_to_indx.find(name) != program_data[get_index(filename)].name_to_indx.end())
         return;
+    if (!name.empty() && eq == "=")
+    {
+        int result = operation_statement(expr, "", "", filename);
+        if (result < INT_MAX && result >= INT_MIN)
+            program_data[get_index(filename)].add_variable(name, false, "NUM", std::to_string(result));
+        else
+            std::cout << "NR VALUE EXCEEDS LIMIT\n";
     }
-
-    if (!name.empty() && eq == "=") {
-        if (v == "true") bool_vars[name] = true;
-        else if (v == "false") bool_vars[name] = false;
-        else if (bool_vars.count(v)) bool_vars[name] = bool_vars[v];
-        else bool_vars[name] = bool_statement(v, y, z);
-    } else {
-        std::cout << "BOOL COULDN'T BE DECLARED\n";
-    }
+    else
+        std::cout << "NR COULDN'T BE DECLARED\n";
 }
 
-void handle_print(std::stringstream& ss) {
+void handle_bool(std::stringstream& ss, const std::string& filename)
+{
+    std::string name, eq, expr, extra;
+    ss >> name >> eq >> expr;
+    std::getline(ss, extra);
+    if (program_data[get_index(filename)].name_to_indx.find(name) != program_data[get_index(filename)].name_to_indx.end())
+        return;
+    if (!name.empty() && eq == "=")
+    {
+        bool result = false;
+        if (expr == "true")
+            result = true;
+        else if (expr == "false")
+            result = false;
+        else
+            result = bool_statement(expr, "", "", filename);
+        program_data[get_index(filename)].add_variable(name, false, "bool type", result ? "true" : "false");
+    }
+    else
+        std::cout << "BOOL COULDN'T BE DECLARED\n";
+}
+
+void handle_print(std::stringstream& ss, const std::string& filename)
+{
     std::string line;
     std::getline(ss, line);
-
     size_t i = 0;
-    while (i < line.size() && isspace(line[i])) ++i;
-
-    while (i < line.size()) {
-        if (i + 1 < line.size() && line[i] == '!' && std::tolower(line[i + 1]) == 'n') {
+    while (i < line.size() && isspace(line[i]))
+        ++i;
+    while (i < line.size())
+    {
+        if (i + 1 < line.size() && line[i] == '\\' && std::tolower(line[i + 1]) == 'n')
+        {
             std::cout << "\n";
             i += 2;
-        } else if (line[i] == '$') {
+        }
+        else if (line[i] == '$')
+        {
             std::string varname;
             ++i;
-            while (i < line.size() && !isspace(line[i])) varname += line[i++];
-            if (is_variable(varname)) {
-                std::string type = get_var_type(varname);
-                if (type == "string type") std::cout << string_vars[varname];
-                else if (type == "bool type") std::cout << bool_vars[varname];
-                else if (type == "num type") std::cout << num_vars[varname];
-            } else {
-                std::cout << '$' << varname;
+            while (i < line.size() && !isspace(line[i]))
+                varname += line[i++];
+            if (program_data[get_index(filename)].name_to_indx.find(varname) != program_data[get_index(filename)].name_to_indx.end())
+            {
+                std::string filename2 = filename;
+                std::string type = get_var_type(varname, filename2);
+                std::string val;
+                if (type == "num type")
+                    val = std::to_string(get_num_val(varname, filename2));
+                else if (type == "bool type")
+                    val = get_bool_val(varname, filename2);
+                else
+                    val = get_string_val(varname, filename2);
+                std::cout << val;
             }
-        } else {
-            std::cout << line[i++];
+            else
+                std::cout << '$' << varname;
         }
+        else
+            std::cout << line[i++];
     }
 }
 
-void skip_if_block(int& line_indx) {
+void skip_if_block(int& line_indx, const std::string& filename)
+{
     int depth = 0;
-    bool found = false;
-    for (int i = line_indx; i < lines; ++i) {
+    for (int i = line_indx; i < lines; ++i)
+    {
         const std::string& line = zlang_input[i];
-        if (line.find("{") != std::string::npos) { depth++; found = true; }
-        if (line.find("}") != std::string::npos && found) {
+        if (line.find("{") != std::string::npos)
+            depth++;
+        if (line.find("}") != std::string::npos)
+        {
             depth--;
-            if (depth == 0) {
+            if (depth == 0)
+            {
                 line_indx = i + 1;
                 return;
             }
@@ -103,260 +132,351 @@ void skip_if_block(int& line_indx) {
     }
 }
 
-void handle_while(std::stringstream& ss, int& line_indx) {
-    std::string left, op, right, brace;
-
-    ss >> left;
-
-    std::string next_token;
-    if (!(ss >> next_token)) {
-        std::cout << "Syntax error: expected condition or '{' after while\n";
-        return;
-    }
-
-    if (next_token == "{") {
-        op = "";
-        right = "";
-        brace = "{";
-    } else {
-        op = next_token;
-
-        if (!(ss >> right)) {
-            std::cout << "Syntax error: expected right operand or '{' after operator\n";
-            return;
-        }
-
-        if (!(ss >> brace)) {
-            std::cout << "Syntax error: expected '{' after condition\n";
-            return;
-        }
-
-        if (brace != "{") {
-            std::cout << "Syntax error: expected '{' after condition in while\n";
-            return;
-        }
-    }
-
-    int block_start = line_indx + 1;
-    int block_end = -1;
-    int depth = 0;
-
-    for (int i = block_start; i < lines; ++i) {
-        const std::string& line = zlang_input[i];
-        if (line.find("{") != std::string::npos) depth++;
-        if (line.find("}") != std::string::npos) {
-            if (depth == 0) {
-                block_end = i;
-                break;
-            } else {
-                depth--;
-            }
-        }
-    }
-
-    if (block_end == -1) {
-        std::cout << "Syntax error: could not find matching '}' for while\n";
-        return;
-    }
-
-    auto condition_true = [&]() -> bool {
-        if (op.empty()) {
-            return bool_statement(left, "is", "true");
-        }
-        return bool_statement(left, op, right);
-    };
-
-    while (condition_true()) {
-        for (int i = block_start; i < block_end; ++i) {
-            proccess_line(zlang_input[i], i);
-        }
-    }
-
-    line_indx = block_end + 1;
-}
-
-void handle_if(std::stringstream& ss, int& line_indx) {
+void handle_if(std::stringstream& ss, int& line_indx, const std::string& filename)
+{
     std::string left, op, right, brace;
     ss >> left >> op >> right >> brace;
 
-    bool condition = bool_statement(left, op, right);
+    bool condition = bool_statement(left, op, right, filename);
 
-    if (!condition) {
-        skip_if_block(line_indx);
-    } else {
-        int depth = 0;
-        bool inside_block = false;
+    int depth = 0;
+    int startBlock = -1;
+    int endBlock = -1;
 
-        for (int i = line_indx; i < lines; ++i) {
-            std::string& line = zlang_input[i];
-            if (line.find("{") != std::string::npos) {
-                depth++; inside_block = true;
-                continue;
-            }
-            if (line.find("}") != std::string::npos && inside_block) {
-                depth--;
-                if (depth == 0) {
-                    line_indx = i + 1;
-                    return;
-                }
-                continue;
-            }
-            if (inside_block && depth > 0) {
-                proccess_line(line, i);
+    for (int i = line_indx; i < lines; ++i)
+    {
+        if (zlang_input[i].find("{") != std::string::npos)
+        {
+            if (depth == 0) startBlock = i + 1;
+            depth++;
+        }
+        else if (zlang_input[i].find("}") != std::string::npos)
+        {
+            depth--;
+            if (depth == 0)
+            {
+                endBlock = i;
+                break;
             }
         }
     }
+
+    if (startBlock == -1 || endBlock == -1)
+    {
+        std::cout << "Syntax error: if block missing braces\n";
+        return;
+    }
+
+    if (condition)
+    {
+        for (int i = startBlock; i < endBlock; ++i)
+        {
+            proccess_line(zlang_input[i], i, filename);
+        }
+    }
+
+    line_indx = endBlock + 1;
 }
 
-void handle_function_def(std::stringstream& ss, int& line_indx) {
+
+
+void handle_while(std::stringstream& ss, int& line_indx, const std::string& filename)
+{
+    std::string left, op, right, brace;
+    ss >> left;
+    std::string token;
+    if (!(ss >> token))
+    {
+        std::cout << "Syntax error: expected condition or '{' after while\n";
+        return;
+    }
+    if (token == "{")
+    {
+        op = "";
+        right = "";
+        brace = "{";
+    }
+    else
+    {
+        op = token;
+        if (!(ss >> right))
+        {
+            std::cout << "Syntax error: expected right operand or '{'\n";
+            return;
+        }
+        if (!(ss >> brace) || brace != "{")
+        {
+            std::cout << "Syntax error: expected '{' after condition\n";
+            return;
+        }
+    }
+    int start = line_indx + 1;
+    int end = -1;
+    int depth = 0;
+    for (int i = start; i < lines; ++i)
+    {
+        const std::string& line = zlang_input[i];
+        if (line.find("{") != std::string::npos)
+            depth++;
+        if (line.find("}") != std::string::npos)
+        {
+            if (depth == 0)
+            {
+                end = i;
+                break;
+            }
+            depth--;
+        }
+    }
+    if (end == -1)
+    {
+        std::cout << "Syntax error: matching '}' not found for while\n";
+        return;
+    }
+    while ( op.empty() ? bool_statement(left, "is", "true", filename) : bool_statement(left, op, right, filename) )
+    {
+        for (int i = start; i < end; ++i)
+            proccess_line(zlang_input[i], i, filename);
+    }
+    line_indx = end + 1;
+}
+
+void handle_function_def(std::stringstream& ss, int& line_indx, const std::string& filename)
+{
     std::string name, token;
     ss >> name >> token;
     current_fn_name = name;
-
-    if (token == ":") {
+    if (token == ":")
+    {
         std::string param;
-        while (ss >> param && param != "{") {
-            fn_params[name].push_back(param);
+        while (ss >> param && param != "{")
+        {
+            program_data[get_index(filename)].fn_params[name].push_back(param);
+            program_data[get_index(filename)].add_variable(param, false, "NUM", "0");
         }
     }
 
-    function_read_info info{name, line_indx, 0};
+    std::string not_const_filename = filename;
+
+    function_read_info info{name, line_indx, 0, not_const_filename};
     std::string fn_body;
     int depth = 0;
     bool started = false;
-
-    for (int i = line_indx; i < lines; ++i) {
+    for (int i = line_indx; i < lines; ++i)
+    {
         std::string& line = zlang_input[i];
-        if (line.find("{") != std::string::npos) {
-            depth++; started = true;
-            if (depth == 1) continue;
+        if (line.find("{") != std::string::npos)
+        {
+            depth++;
+            started = true;
+            if (depth == 1)
+                continue;
         }
-        if (line.find("}") != std::string::npos && started) {
+        if (line.find("}") != std::string::npos && started)
+        {
             depth--;
-            if (depth == 0) {
+            if (depth == 0)
+            {
                 info.end_indx = i + 1;
                 function_read_info_arr.push_back(info);
-                fn_contents[name] = fn_body;
+                program_data[get_index(filename)].fn_contents[name] = fn_body;
                 line_indx = i + 1;
                 return;
             }
         }
-        if (started && depth > 0) {
+        if (started && depth > 0)
             fn_body += line + "\n";
-        }
     }
 }
 
-void handle_function_fire(std::stringstream& ss) {
-    fn_values[current_fn_name] = "";
+void handle_function_fire(std::stringstream& ss, const std::string& filename)
+{
+    std::string fn_name, token;
+    ss >> fn_name >> token;
 
-    std::string fn_name, param_token;
-    ss >> fn_name >> param_token;
-    int fn_index = get_function_read_info_arr_indx(fn_name);
-
-    if (fn_params[fn_name].size() > 0 && param_token == ":") {
-        int param_idx = 0;
-        std::string param_val;
-        while (param_idx < fn_params[fn_name].size() && ss >> param_val) {
-            set_variable_to_data(fn_params[fn_name][param_idx++], param_val);
-        }
-
-        if (param_idx < fn_params[fn_name].size()) {
-            std::cout << "Not enough params for function: " << fn_name << "\n";
-            return;
+    int fn_index = -1;
+    for (int i = 0; i < function_read_info_arr.size(); ++i)
+    {
+        if (function_read_info_arr[i].name == fn_name &&
+            function_read_info_arr[i].filename == filename)
+        {
+            fn_index = i;
+            break;
         }
     }
 
-    if (!fn_contents.count(fn_name)) {
-        std::cout << "FUNCTION '" << fn_name << "' NOT FOUND\n";
+    if (fn_index == -1)
+    {
+        std::cout << "FUNCTION '" << fn_name << "' NOT FOUND IN FILE '" << filename << "'\n";
         return;
     }
 
     current_fn_name = fn_name;
-    for (int i = function_read_info_arr[fn_index].start_indx + 1;
-         i < function_read_info_arr[fn_index].end_indx - 1; ++i) {
-        remove_whitespace(zlang_input[i]);
-        proccess_line(zlang_input[i], i);
+
+    program_data[get_index(filename)].fn_values[fn_name] = "";
+
+    auto& fn_params = program_data[get_index(filename)].fn_params;
+    if (!fn_params[fn_name].empty() && token == ":")
+    {
+        int idx = 0;
+        std::string arg;
+        while (idx < fn_params[fn_name].size() && ss >> arg)
+        {
+            set_variable_to_data(fn_params[fn_name][idx++], arg);
+        }
+        if (idx < fn_params[fn_name].size())
+        {
+            std::cout << "Not enough parameters for function: " << fn_name << "\n";
+            current_fn_name = "";
+            return;
+        }
     }
+
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Could not open file: " << filename << "\n";
+        current_fn_name = "";
+        return;
+    }
+
+    std::vector<std::string> file_lines;
+    std::string line;
+    while (std::getline(file, line))
+        file_lines.push_back(line);
+    file.close();
+
+    int start = function_read_info_arr[fn_index].start_indx + 1;
+    int end = function_read_info_arr[fn_index].end_indx - 1;
+    if (start < 0) start = 0;
+    if (end > static_cast<int>(file_lines.size())) end = file_lines.size();
+
+    for (int i = start; i < end; ++i)
+    {
+        remove_whitespace(file_lines[i]);
+
+        proccess_line(file_lines[i], i, filename);
+
+        if (!program_data[get_index(filename)].fn_values[fn_name].empty())
+        {
+            break;
+        }
+    }
+    if (program_data[get_index(filename)].fn_values[fn_name].empty())
+        program_data[get_index(filename)].fn_values[fn_name] = "";
+
     current_fn_name = "";
 }
 
-void waitms(int ms) {
-    if (ms < 0 || ms > 3600000) {
+
+void waitms(int ms)
+{
+    if (ms < 0 || ms > 3600000)
         std::cout << "WAITMS TIME OUT OF RANGE (0–3600000)\n";
-    } else {
+    else
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    }
 }
 
-void proccess_line(std::string& x, int& line_indx) {
-    std::stringstream ss(x);
-    std::string keyword;
-    ss >> keyword;
+void waits(int s)
+{
+    if (s < 0 || s > 3600)
+        std::cout << "WAIT TIME OUT OF RANGE (0–3600 seconds)\n";
+    else
+        std::this_thread::sleep_for(std::chrono::milliseconds(s * 1000));
+}
 
-    if (keyword == "nr") handle_nr(ss);
-    else if (keyword == "bool") handle_bool(ss);
-    else if (keyword == "print") handle_print(ss);
-    else if (keyword == "toinput") {
+void proccess_line(std::string& x, int& line_indx, const std::string& filename)
+{
+    remove_whitespace(x);
+    if (x.empty())
+        return;
+    std::stringstream ss(x);
+    std::string token;
+    ss >> token;
+    if (token == "num")
+        handle_nr(ss, filename);
+    else if (token == "bool")
+        handle_bool(ss, filename);
+    else if (token == "print")
+        handle_print(ss, filename);
+    else if (token == "toinput")
+    {
         std::string var;
         ss >> var;
-        if (is_variable(var)) {
+        if (program_data[get_index(filename)].name_to_indx.find(var) == program_data[get_index(filename)].name_to_indx.end())
             set_variable_to_data(var, program_input[current_zlang_input_line++]);
-        } else {
+        else
             std::cout << "COULD NOT ASSIGN TO NON-EXISTENT VARIABLE\n";
-        }
-    } else if (keyword == "--") {
+    }
+    else if (token == "--")
         return;
-    } else if (keyword == "if") {
-        handle_if(ss, line_indx);
-    } else if(keyword == "while"){
-        handle_while(ss,line_indx);
-    }else if (keyword == "fn") {
-        handle_function_def(ss, line_indx);
-    } else if (keyword == "return") {
+    else if (token == "if"){
+       // std::cout<<"if\n";
+        handle_if(ss, line_indx, filename);
+    }else if (token == "while"){
+        handle_while(ss, line_indx, filename);
+    }else if (token == "fn"){
+        handle_function_def(ss, line_indx, filename);
+    }else if (token == "return")
+    {
         std::string value;
         ss >> value;
-        if (current_fn_name.empty()) {
-            std::cout << "Cannot return outside of function\n";
-        } else if (value.empty()) {
-            std::cout << "Return value must not be empty!\n";
-        } else if (!is_datatype(value)) {
-            std::cout << "Cannot return non-existent data type value!\n";
-        } else if (fn_values[current_fn_name].empty()) {
-            fn_values[current_fn_name] = value;
+        if (current_fn_name.empty())
+            std::cout << "Return not allowed outside function\n";
+        else if (value.empty())
+            std::cout << "Return value cannot be empty!\n";
+        else if (!is_datatype(value))
+            std::cout << "Invalid return datatype!\n";
+        else if (program_data[get_index(filename)].fn_values[current_fn_name].empty())
+            program_data[get_index(filename)].fn_values[current_fn_name] = value;
+    }
+    else if (token == "fire")
+        handle_function_fire(ss, filename);
+    else if (token == "waitms")
+    {
+        int ms;
+        ss >> ms;
+        waitms(ms);
+    }
+    else if (token == "wait")
+    {
+        int s;
+        ss >> s;
+        waits(s);
+    }
+    else
+    {
+        std::string op, arg1, arg2, arg3;
+        ss >> op >> arg1 >> arg2 >> arg3;
+        int prog_idx = get_index(filename);
+        if (prog_idx == -1)
+        {
+            std::cout << "File not found in program_data\n";
+            return;
         }
-    } else if (keyword == "fire") {
-        handle_function_fire(ss);
-    } else if (keyword == "clear") {
-        system("cls");
-    } else if (keyword == "wait") {
-        std::string time_str;
-        ss >> time_str;
-        int wait_time = is_num(time_str) ? std::stoi(time_str) : num_vars[time_str];
-        if (wait_time < 0 || wait_time > 3600) {
-            std::cout << "WAIT TIME OUT OF RANGE (0–3600)\n";
-        } else {
-            std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+
+        std::string filename_non_const = filename;
+
+        std::string type = get_var_type(token, filename_non_const);
+        if (type == "num type")
+        {
+            int result = operation_statement(arg1, arg2, arg3, filename);
+            auto it = program_data[prog_idx].name_to_indx.find(token);
+            if (it != program_data[prog_idx].name_to_indx.end())
+                program_data[prog_idx].values[it->second].value = std::to_string(result);
+            else
+                std::cout << "Variable not found: " << token << "\n";
         }
-    } else if (keyword == "waitms") {
-        std::string ms_str;
-        ss >> ms_str;
-        int wait_time = is_num(ms_str) ? std::stoi(ms_str) : num_vars[ms_str];
-        waitms(wait_time);
-    } else if (keyword == "color") {
-        std::string mode;
-        int fg = 7, bg = -1;
-        ss >> mode;
-        if (mode == "fg") ss >> fg;
-        else if (mode == "bg") ss >> bg;
-        else if (mode == "both") ss >> fg >> bg;
-        else std::cout << "INVALID COLOR MODE. USE: fg, bg, or both\n";
-        set_console_color(fg, bg);
-    }  else {
-        std::string op, z, Z, Y;
-        ss >> op >> z >> Z >> Y;
-        std::string type = get_var_type(keyword);
-        if (type == "num type") num_vars[keyword] = operation_statement(z, Z, Y);
-        else if (type == "bool type") bool_vars[keyword] = bool_statement(z, Z, Y);
+        else if (type == "bool type")
+        {
+            bool result = bool_statement(arg1, arg2, arg3, filename);
+            auto it = program_data[prog_idx].name_to_indx.find(token);
+            if (it != program_data[prog_idx].name_to_indx.end())
+                program_data[prog_idx].values[it->second].value = result ? "true" : "false";
+            else
+                std::cout << "Variable not found: " << token << "\n";
+        }
+        else
+            std::cout << "Unsupported variable type: " << token << "\n";
     }
 }
