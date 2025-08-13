@@ -13,7 +13,7 @@ Here are some of its functionalities:
 Current types: nr [Number], bool [Boolean]
 
 ```zLang
-nr x = 69
+num x = 69
 -- This is a comment
 ```
 
@@ -22,8 +22,8 @@ nr x = 69
 *Output*
 
 ```zLang
-nr x = 10
-nr y = 15
+num x = 10
+num y = 15
 
 
 print this is x: $x and this is y: $y
@@ -43,14 +43,14 @@ this is x: 10 and this is y: 15
 ```
 
 ```zLang
-nr x = 0
-nr y = 0
+num x = 0
+num y = 0
 
 toinput x
 toinput y
 
-print $x !n
-print $y !n
+print $x \n
+print $y \n
 ```
 
 --> Will output
@@ -63,7 +63,7 @@ print $y !n
 **Print new lines**
 
 ```zlang 
-print Hello !n World \n NewLine
+print Hello \n World \n NewLine
 ```
 --> Will output
 
@@ -77,24 +77,24 @@ Hello
 
 ```zLang
 
-nr x = 10
-nr y = 15
+num x = 10
+num y = 15
 
 if y is 15 {
 
     print $y = 15
 }
 
-bool check_boolean = x is y
+bool check_boolean = false
 
 if check_boolean is false {
 
-    print !nis false
+    print \n is false
 }
 
 if check_boolean is true {
 
-    print !nis true
+    print \n is true
 }
 
 ```
@@ -122,12 +122,12 @@ if fooAns is true {
 
 ```zLang
 
-nr x = 0
+num x = 0
 
 while x < 50 {
 
  x = x + 1
- print $x !n
+ print $x \n
 }
 ```
 
