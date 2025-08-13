@@ -213,6 +213,6 @@ color both 7 0
 
 **What's next (zLang 1.60+)?**
 
-*The zLang interpreter will be way faster accessing variables in O(1) time*
-
+*Each zLang program will have its own variable ecosystem*
+*The keyword * **import** * will be added*
 *zLang will feature support for global variables and strings alongside with support for multiple files*
