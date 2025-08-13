@@ -1,4 +1,3 @@
-
 #include <string>
 #include <cmath>
 #include <climits>
@@ -7,116 +6,120 @@
 #include "data.h"
 #include "input_parse.h"
 
+var_storage GLOBAL_DATA;
+std::vector<var_storage> program_data;
 std::unordered_map<std::string, int> num_vars;
-std::unordered_map<std::string, bool> bool_vars;
 std::unordered_map<std::string, std::string> string_vars;
-std::unordered_map<std::string, std::string> fn_contents;
-std::unordered_map<std::string, std::vector<std::string>> fn_params;
-std::unordered_map<std::string, std::string> fn_values;
-int function_read_info_indx=0;
-std::vector<function_read_info>function_read_info_arr;
+std::unordered_map<std::string, bool> bool_vars;
+std::vector<function_read_info> function_read_info_arr;
+//std::unordered_map<std::string, std::string> fn_contents;
+//std::unordered_map<std::string, std::vector<std::string>> fn_params;
 
-bool is_datatype(std::string& value){
-    if(is_num(value)){return true;}
-    if(value == "true"||value=="false"){return true;}
-    return true;
-}
-
-int get_function_read_info_arr_indx(std::string& fname){
-    for(int i = 0 ; i < function_read_info_arr.size(); ++ i){
-        if(function_read_info_arr[i].name == fname){return i;}
+int get_index(const std::string& name)
+{
+    for (int i = 0; i < program_data.size(); i++)
+    {
+        if (program_data[i].name == name)
+            return i;
     }
     return -1;
 }
 
-int get_num_val(std::string& name){
-    auto it = num_vars.find(name);
-    if(it == num_vars.end()) return INT_MAX;
-    return it->second;
+int get_num_val(std::string& name, std::string& filename)
+{
+    int idx = get_index(filename);
+    if (idx == -1)
+        return 0;
+    var_storage &vs = program_data[idx];
+    if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
+        return std::stoi(vs.values[vs.name_to_indx[name]].value);
+    return 0;
 }
 
-std::string get_bool_val(std::string& name){
-    if(bool_vars.find(name) == bool_vars.end()){
-        std::cout << "VALUE DOESNT EXIST\n";
-        return "ERR";
+std::string get_bool_val(std::string& name, std::string& filename)
+{
+    int idx = get_index(filename);
+    if (idx == -1)
+        return "";
+    var_storage &vs = program_data[idx];
+    if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
+        return vs.values[vs.name_to_indx[name]].value;
+    return "";
+}
+
+std::string get_string_val(std::string& name, std::string& filename)
+{
+    int idx = get_index(filename);
+    if (idx == -1)
+        return "";
+    var_storage &vs = program_data[idx];
+    if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
+        return vs.values[vs.name_to_indx[name]].value;
+    return "";
+}
+
+std::string get_var_type(std::string& name, std::string& filename)
+{
+    int idx = get_index(filename);
+    if (idx == -1)
+        return "";
+    var_storage &vs = program_data[idx];
+    if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
+    {
+        var_storage::var_data &vd = vs.values[vs.name_to_indx[name]];
+        if (vd.type == var_storage::NUM)
+            return "num type";
+        if (vd.type == var_storage::BOOL)
+            return "bool type";
+        return "unknown";
     }
-    return bool_vars[name] ? "true" : "false";
+    return "";
 }
 
-std::string get_string_val(std::string& name){
-
-    if(string_vars.find(name) == string_vars.end()){
-        return "ERR";
+int get_function_read_info_arr_indx(std::string& fname, const std::string& filename)
+{
+    for (int i = 0; i < function_read_info_arr.size(); i++)
+    {
+        if (function_read_info_arr[i].name == fname && function_read_info_arr[i].filename == filename)
+            return i;
     }
-
-    return (string_vars[name]);
+    return -1;
 }
 
-std::string get_var_type(std::string& name) {
-    if (string_vars.find(name) != string_vars.end()) return "string type";
-    if (num_vars.find(name) != num_vars.end()) return "num type";
-    if (bool_vars.find(name) != bool_vars.end()) return "bool type";
-    return "unknown type";
+void set_variable_to_data(std::string& varname, std::string& data_name)
+{
+    if (!program_data.empty())
+        program_data[0].set_variable(varname, data_name);
 }
 
-
-// will help A LOT
-
-bool is_variable(std::string& name){
-    if(num_vars.find(name) == num_vars.end() && string_vars.find(name) == string_vars.end() && bool_vars.find(name) == bool_vars.end()){
-        return false;
-    }
-    return true;
+bool is_datatype(std::string& value) // this might cause some bugs.
+{
+    if (value == "NUM" || value == "bool type" || value == "BOOL" || is_num(value) || is_bool(value))
+        return true;
+    return false;
 }
 
-void set_variable_to_data(std::string& varname, std::string& data_name){
-
-    if(is_num(data_name)){
-        num_vars[varname] = std::stoi(data_name);
+void var_storage::add_variable(const std::string& name, bool constant, const std::string& TYPE, const std::string& VALUE, bool GLOBAL)
+{
+    if (name_to_indx.find(name) != name_to_indx.end())
         return;
-    }
-
-    if(num_vars.find(data_name)!=num_vars.end()){
-        num_vars[varname] = num_vars[data_name];
-        return;
-    }
-
-    if(data_name == "true" || data_name == "false"){
-        // no built in cpp function for this.
-        if(data_name == "true"){
-            bool_vars[varname]=true;
-        }else{bool_vars[varname]=false;}
-        return;
-    }
-
-    if(bool_vars.find(data_name)!=bool_vars.end()){
-        bool_vars[varname] = bool_vars[data_name];
-        return;
-    }
-
-    std::cout<<data_name<<" isn't a variable, therefore it cannot be assigned to: "<<varname<<"\n";
+    var_data data;
+    data.name = name;
+    data.value = VALUE;
+    if (TYPE == "NUM")
+        data.type = NUM;
+    else if (TYPE == "bool type" || TYPE == "BOOL")
+        data.type = BOOL;
+    else
+        data.type = NULL_TYPE;
+    data.constant = constant;
+    name_to_indx[name] = values.size();
+    values.push_back(data);
 }
 
-void set_variable(std::string& name, std::string& value){
-    if(num_vars.find(name) != num_vars.end()){
-        if(is_num(value)){
-            num_vars[name] = std::stoi(value);
-        } else {
-            std::cout << "COULDNT ASSIGN NUM TO NOT NUM TYPE\n";
-            return;
-        }
-    } else if (bool_vars.find(name) != bool_vars.end()) {
-        if(value == "true"||value=="1") {
-            bool_vars[name] = true;
-        } else if(value == "false"||value=="0") {
-            bool_vars[name] = false;
-        } else {
-            std::cout << "COULDNT ASSIGN BOOL TO NOT BOOL TYPE\n";
-            return;
-        }
-    } else if (string_vars.find(name) != string_vars.end()) {
-        string_vars[name] = value;
-    } else {
-        std::cout << "VARIABLE DOES NOT EXIST\n";
-    }
+void var_storage::set_variable(const std::string& name, const std::string& v, bool GLOBAL)
+{
+    if (name_to_indx.find(name) == name_to_indx.end())
+        return;
+    values[name_to_indx[name]].value = v;
 }
