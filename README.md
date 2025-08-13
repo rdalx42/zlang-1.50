@@ -214,5 +214,9 @@ color both 7 0
 **What's next (zLang 1.60+)?**
 
 *Each zLang program will have its own variable ecosystem*
-*The keyword * **import** * will be added*
+
+
+*The import keyword will be added*
+
+
 *zLang will feature support for global variables and strings alongside with support for multiple files*
