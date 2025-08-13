@@ -20,7 +20,7 @@ const char* pattern[] = {
     "@@@@@@@@@@      @@@@@",
     "@@@@@@@@       @@@@@@",
     "@@@@@@        @@@@@@@",
-    "@@@@@        1.40 @@@",
+    "@@@@@        1.50+ @@",
     "@@@@@@@@@@@@@@@@@@@@@",
 };
 
@@ -29,9 +29,9 @@ const int SCALE = 1;
 const int DELAY_MS = 1;
 
 void printCharBlock(char c) {
-    char printChar = (c == '@') ? '@' : ' ';
+    
     for (int i = 0; i < SCALE; ++i)
-        std::cout << printChar;
+        std::cout << c;
 }
 
 void printScaledLine(const char* line) {
@@ -70,9 +70,9 @@ void animatePatternScaled() {
 
             for (int i = 0; i < len; ++i) {
                 char c = line[i];
-                char printChar = (c == '@') ? '@' : ' ';
+                
                 for (int h = 0; h < SCALE; ++h) {
-                    std::cout << printChar;
+                    std::cout << c;
                     std::cout.flush();
                     std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_MS));
                 }
@@ -89,8 +89,6 @@ int main(void) {
     if (!input) {
         return 0;
     }
-
-    std::cout << "\n======== [WRITE PROGRAM INPUT - PRESS CTRL + C AND ENTER TO FINISH] ========\n";
 
     std::string ln;
 
@@ -112,9 +110,26 @@ int main(void) {
 
     std::cout << "\n======== [ZLANG OUTPUT] ========\n";
 
-    RUN_ZLANG();
+    auto start = std::chrono::high_resolution_clock::now();
 
-    std::cout << "\n======== [INPUT LINES: " << lines << "]========\n";
+    program_data.push_back(var_storage{}); 
+    program_data[var_indx].name = "main.zl";
+    RUN_ZLANG("main.zl");
 
+    var_indx++;
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Program runtime: " << duration.count() << " milliseconds\n";
+
+    std::cout<<"\nTYPE 'END' TO EXIT\n";
+    
+    while (true) {
+        std::getline(std::cin, ln);
+        if (ln == "END") break;
+        program_input[input_lines] = ln;
+        ++input_lines;
+    }
     return 0;
 }
