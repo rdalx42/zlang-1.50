@@ -1,11 +1,11 @@
-# zLang 1.50+
+# zLang 1.60
 An interpreted WORK IN PROGRESS programming language built with c++.
 
-<img width="180" height="180" alt="Zlang Version 1.50+" src="https://github.com/user-attachments/assets/bcd7b942-b35b-46fd-90a9-0ef1d72c3a09" />
+<img <img width="180" height="180" alt="zlang new logo" src="https://github.com/user-attachments/assets/286edec4-df89-4247-b956-8d699d36149b" />
 
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
-runs file with .zl extension
+runs files with .zl extension
 
 Here are some of its functionalities:
 
@@ -50,8 +50,8 @@ num y = 0
 toinput x
 toinput y
 
-print $x \n
-print $y \n
+print "$x \n"
+print "$y \n"
 ```
 
 --> Will output
@@ -90,12 +90,12 @@ bool check_boolean = false
 
 if check_boolean is false {
 
-    print \n is false
+    print "\n is false"
 }
 
 if check_boolean is true {
 
-    print \n is true
+    print "\n is true"
 }
 
 ```
@@ -128,7 +128,7 @@ num x = 0
 while x < 50 {
 
  x = x + 1
- print $x \n
+ print "$x \n"
 }
 ```
 
@@ -139,12 +139,27 @@ while x < 50 {
 
 wait 5
 -- will only run after 5 seconds
-print wait completed in seconds
+print "wait completed in seconds"
 waitms 5
 
 -- will run after 5 miliseconds
 
-print wait completed in miliseconds
+print "wait completed in miliseconds"
+```
+
+**Import other programs**
+
+```zLang
+
+import "hi.zl"
+print "Imported hi.zl!\n"
+```
+
+hi.zl:
+
+```zLang
+
+print "Hiiiiii"
 ```
 
 **Change console color**
@@ -172,8 +187,6 @@ color both 7 0
 ```
 
 
-**What's next (zLang 1.60+)?**
-
-*The import keyword will be added*
+**What's next (zLang 1.70)?**
 
 *zLang will feature support for global variables and strings alongside with support for multiple files*
