@@ -15,12 +15,12 @@ fn draw : UPDATE_TIME {
         i = 0 
         
         while i < I_SIZE {
-            print \n
+            print "\n"
             i = i + 1
             j = 0 
             while j < J_SIZE {
                 color  15 1
-                print * 
+                print "*" 
 
                 j = j + 1
             }
