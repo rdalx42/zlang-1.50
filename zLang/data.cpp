@@ -6,8 +6,8 @@
 #include "data.h"
 #include "input_parse.h"
 
-var_storage GLOBAL_DATA;
-std::vector<var_storage> program_data;
+zLangProgram GLOBAL_DATA;
+std::vector<zLangProgram> program_data;
 std::unordered_map<std::string, int> num_vars;
 std::unordered_map<std::string, std::string> string_vars;
 std::unordered_map<std::string, bool> bool_vars;
@@ -30,7 +30,7 @@ int get_num_val(std::string& name, std::string& filename)
     int idx = get_index(filename);
     if (idx == -1)
         return 0;
-    var_storage &vs = program_data[idx];
+    zLangProgram &vs = program_data[idx];
     if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
         return std::stoi(vs.values[vs.name_to_indx[name]].value);
     return 0;
@@ -41,7 +41,7 @@ std::string get_bool_val(std::string& name, std::string& filename)
     int idx = get_index(filename);
     if (idx == -1)
         return "";
-    var_storage &vs = program_data[idx];
+    zLangProgram &vs = program_data[idx];
     if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
         return vs.values[vs.name_to_indx[name]].value;
     return "";
@@ -52,7 +52,7 @@ std::string get_string_val(std::string& name, std::string& filename)
     int idx = get_index(filename);
     if (idx == -1)
         return "";
-    var_storage &vs = program_data[idx];
+    zLangProgram &vs = program_data[idx];
     if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
         return vs.values[vs.name_to_indx[name]].value;
     return "";
@@ -63,13 +63,13 @@ std::string get_var_type(std::string& name, std::string& filename)
     int idx = get_index(filename);
     if (idx == -1)
         return "";
-    var_storage &vs = program_data[idx];
+    zLangProgram &vs = program_data[idx];
     if (vs.name_to_indx.find(name) != vs.name_to_indx.end())
     {
-        var_storage::var_data &vd = vs.values[vs.name_to_indx[name]];
-        if (vd.type == var_storage::NUM)
+        zLangProgram::var_data &vd = vs.values[vs.name_to_indx[name]];
+        if (vd.type == zLangProgram::NUM)
             return "num type";
-        if (vd.type == var_storage::BOOL)
+        if (vd.type == zLangProgram::BOOL)
             return "bool type";
         return "unknown";
     }
@@ -92,14 +92,14 @@ void set_variable_to_data(std::string& varname, std::string& data_name)
         program_data[0].set_variable(varname, data_name);
 }
 
-bool is_datatype(std::string& value) // this might cause some bugs.
+bool is_datatype(std::string& value, std::string& filename) // this might cause some bugs.
 {
-    if (value == "NUM" || value == "bool type" || value == "BOOL" || is_num(value) || is_bool(value))
+    if (value == "NUM" || value == "bool type" || value == "BOOL" || is_num(value) || is_bool(value) || program_data[get_index(filename)].name_to_indx.find(value) != program_data[get_index(filename)].name_to_indx.end())
         return true;
     return false;
 }
 
-void var_storage::add_variable(const std::string& name, bool constant, const std::string& TYPE, const std::string& VALUE, bool GLOBAL)
+void zLangProgram::add_variable(const std::string& name, bool constant, const std::string& TYPE, const std::string& VALUE, bool GLOBAL)
 {
     if (name_to_indx.find(name) != name_to_indx.end())
         return;
@@ -117,9 +117,19 @@ void var_storage::add_variable(const std::string& name, bool constant, const std
     values.push_back(data);
 }
 
-void var_storage::set_variable(const std::string& name, const std::string& v, bool GLOBAL)
+void zLangProgram::set_variable(const std::string& name, const std::string& v, bool GLOBAL)
 {
+
     if (name_to_indx.find(name) == name_to_indx.end())
+    {
         return;
+    }
+
+    if (values[name_to_indx[name]].constant==true)
+    {
+       // std::cout<<"ERROR; CAN'T MODIFY CONSTANT VARIABLE: "<<name<<"\n";
+        return;
+    }
+    
     values[name_to_indx[name]].value = v;
 }
