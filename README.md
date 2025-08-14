@@ -2,6 +2,7 @@
 An interpreted WORK IN PROGRESS programming language built with c++.
 
 <img width="180" height="180" alt="Zlang Version 1.50+" src="https://github.com/user-attachments/assets/bcd7b942-b35b-46fd-90a9-0ef1d72c3a09" />
+
 zLang is made in c++ but in the way a C developer would do it - this means no classes, I thought it would be a fun challange.
 
 runs file with .zl extension
@@ -22,7 +23,7 @@ num x = 69
 *Output*
 
 ```zLang
-num x = 10
+const num x = 10
 num y = 15
 
 
