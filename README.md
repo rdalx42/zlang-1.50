@@ -114,7 +114,7 @@ fire foo : true
 
 bool fooAns = :foo
 if fooAns is true {
- print function is true !
+ print "function is true !"
 }
 
 ```
