@@ -27,7 +27,7 @@ const num x = 10
 num y = 15
 
 
-print this is x: $x and this is y: $y
+print "this is x: $x and this is y: $y"
 ```
 
 --> Will output
@@ -64,7 +64,7 @@ print "$y \n"
 **Print new lines**
 
 ```zlang 
-print Hello \n World \n NewLine
+print "Hello \n World \n NewLine"
 ```
 --> Will output
 
@@ -84,7 +84,7 @@ num y = 15
 if y is 15 {
 
     print $y = 15
-}
+} 
 
 bool check_boolean = false
 
