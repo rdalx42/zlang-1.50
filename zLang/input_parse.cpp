@@ -13,6 +13,8 @@ int input_lines = 0;
 int current_zlang_input_line = 0;
 int var_indx = 0;
 
+
+
 std::vector<std::string> space_tokens = {
     "=",
     "+",
@@ -22,8 +24,6 @@ std::vector<std::string> space_tokens = {
     ":",
     "{",
     "}",
-    "\"",
-    "'",
     "--"
 };
 
@@ -33,18 +33,62 @@ void remove_whitespace(std::string& x) {
     x = x.substr(i);
 }
 
-void RUN_ZLANG(const std::string& filename) {
-    var_storage CURRENT_DATA;
+void RUN_ZLANG(const std::string& filename, std::vector<std::string> source, int lines_of_code) {
+    zLangProgram CURRENT_DATA;
     CURRENT_DATA.name = filename;
-    
-    for (int i = 0; i < lines; ++i) {
-        
-        remove_whitespace(zlang_input[i]);
-        if(empty(zlang_input[i])){continue;}
-        proccess_line(zlang_input[i], i, filename);
-        
+
+    for (int i = 0; i < lines_of_code; ++i) {
+        CURRENT_DATA.line_indx = i;
+
+        std::string line = source[i];  
+        remove_whitespace(line);
+
+        if (line.empty()) {
+            continue;
+        }
+
+        proccess_line(line, CURRENT_DATA.line_indx, filename, lines_of_code);
     }
+
     program_data.push_back(CURRENT_DATA);
+}
+
+std::vector<std::string> get_input_from_file(const std::string& filename) {
+
+    std::ifstream file(filename);
+    
+    if (!file.is_open()) {
+        std::cout << "Couldn't read code input from non existing file\n";
+        return {"0"};
+    }
+    
+    std::vector<std::string> input_lines;
+    std::string ln; 
+
+    while (std::getline(file, ln)) {
+        input_lines.push_back(ln);
+    }
+
+    return input_lines;
+}
+
+int get_size_from_file(const std::string& filename){
+    
+    std::ifstream file(filename);
+    
+    if(!file.is_open()){
+        std::cout << "Couldn't read code input from non existing file\n";
+        return 0;
+    }
+
+    std::string ln; 
+    int line_count = 0;
+
+    while (std::getline(file, ln)) {
+        line_count ++ ;
+    }
+
+    return line_count;
 }
 
 void clean_program_input() {
