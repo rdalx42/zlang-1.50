@@ -4,7 +4,7 @@
 const num I_SIZE = 10 
 const num J_SIZE = 10
 
-fn draw {
+fn draw : UPDATE_TIME {
     num i = 0 
     num j = 0
 
@@ -24,10 +24,10 @@ fn draw {
             }
         }
 
-        waitms 5 
+        waitms UPDATE_TIME 
 
         clear
     }
 }
 
-fire draw 
+fire draw : 5
