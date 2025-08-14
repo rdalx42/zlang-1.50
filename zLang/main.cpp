@@ -12,15 +12,15 @@ std::ifstream zlinput("input.txt");
 
 const char* pattern[] = {
     "@@@@@@@@@@@@@@@@@@@@@",
-    "@@@@@@              @",
-    "@@@@@@@@@@@@@@@@@@  @",
-    "@@@@@@@@@@@@@@@@   @@",
-    "@@@@@@@@@@@@@@    @@@",
-    "@@@@@@@@@@@@     @@@@",
-    "@@@@@@@@@@      @@@@@",
-    "@@@@@@@@       @@@@@@",
-    "@@@@@@        @@@@@@@",
-    "@@@@@        1.50+ @@",
+    "@@@@@@@@@@@@@@@@@@@@@",
+    "@@@@@@@@@@@@@@@@@@@@@",
+    "@@@@@@@@@@@@@@@@@@@@@",
+    "@@@@@@@@@@@@@@@@@@@@@",
+    "@@@@@@@@@@@@@@@@@@@@@",
+    "@@@@@@     @@  @@@@@@",
+    "@@@@@@@@  @@@  @@@@@@",
+    "@@@@@@@  @@@@  @@@@@@",
+    "@@@ @@     @@     @@@",
     "@@@@@@@@@@@@@@@@@@@@@",
 };
 
@@ -29,9 +29,11 @@ const int SCALE = 1;
 const int DELAY_MS = 1;
 
 void printCharBlock(char c) {
-    
+    const char* color = (c == '@') ? "\033[33m" : "\033[37m"; 
+    std::cout << color;
     for (int i = 0; i < SCALE; ++i)
         std::cout << c;
+    std::cout << "\033[0m";
 }
 
 void printScaledLine(const char* line) {
@@ -70,9 +72,9 @@ void animatePatternScaled() {
 
             for (int i = 0; i < len; ++i) {
                 char c = line[i];
-                
+
                 for (int h = 0; h < SCALE; ++h) {
-                    std::cout << c;
+                    printCharBlock(c);
                     std::cout.flush();
                     std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_MS));
                 }
@@ -84,25 +86,15 @@ void animatePatternScaled() {
 }
 
 int main(void) {
+    
     animatePatternScaled();
 
-    if (!input) {
+    if(!input){
+        std::cout<<"couldn't open main.zl file!\n";
         return 0;
     }
 
     std::string ln;
-
-    while(std::getline(zlinput,ln)){
-        program_input[input_lines]=ln;
-        ++input_lines;
-    }
-
-    ln = "";
-
-    while (std::getline(input, ln)) {
-        zlang_input[lines] = ln;
-        ++lines;
-    }
 
     std::cout << "\n======== [CODE INPUT] ========\n\n";
 
@@ -112,16 +104,17 @@ int main(void) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    program_data.push_back(var_storage{}); 
+    program_data.push_back(zLangProgram{}); 
     program_data[var_indx].name = "main.zl";
-    RUN_ZLANG("main.zl");
+   // program_data[var_indx].has_ran = true;
+    RUN_ZLANG("main.zl", get_input_from_file("main.zl"), get_size_from_file("main.zl"));
 
     var_indx++;
 
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "Program runtime: " << duration.count() << " milliseconds\n";
+    std::cout << "\n\nProgram runtime: " << duration.count() << " milliseconds\n";
 
     std::cout<<"\nTYPE 'END' TO EXIT\n";
     
