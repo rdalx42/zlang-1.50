@@ -29,11 +29,13 @@ void set_console_color(int fg, int bg)
     SetConsoleTextAttribute(hConsole, (bg << 4) | (fg & 0x0F));
 }
 
-void handle_nr(std::stringstream& ss, const std::string& filename)
+void handle_nr(std::stringstream& ss, const std::string& filename,  bool is_const=false)
 {
     std::string name, eq, expr, extra;
+    
     ss >> name >> eq >> expr;
     
+
     std::getline(ss, extra);
     if (program_data[get_index(filename)].name_to_indx.find(name) != program_data[get_index(filename)].name_to_indx.end())
         return;
@@ -41,15 +43,22 @@ void handle_nr(std::stringstream& ss, const std::string& filename)
     {
         int result = operation_statement(expr, "", "", filename);
         if (result < INT_MAX && result >= INT_MIN)
-            program_data[get_index(filename)].add_variable(name, false, "NUM", std::to_string(result));
+        {
+            program_data[get_index(filename)].add_variable(name, is_const, "NUM", std::to_string(result));
+           // std::cout<<"setting value!\n";
+        }    
         else
+        {
             std::cout << "NR VALUE EXCEEDS LIMIT\n";
+        }    
     }
     else
+    {
         std::cout << "NR COULDN'T BE DECLARED\n";
+    }    
 }
 
-void handle_bool(std::stringstream& ss, const std::string& filename)
+void handle_bool(std::stringstream& ss, const std::string& filename, bool is_const)
 {
     std::string name, eq, expr, extra, extra2;
     ss >> name >> eq >> expr >> extra >> extra2;
@@ -65,7 +74,7 @@ void handle_bool(std::stringstream& ss, const std::string& filename)
             result = false;
         else
             result = bool_statement(expr, extra, extra2, filename);
-        program_data[get_index(filename)].add_variable(name, false, "bool type", result ? "true" : "false");
+        program_data[get_index(filename)].add_variable(name, is_const, "bool type", result ? "true" : "false");
     }
     else
         std::cout << "BOOL COULDN'T BE DECLARED\n";
@@ -297,8 +306,7 @@ void handle_function_fire(std::stringstream& ss, const std::string& filename)
     int fn_index = -1;
     for (int i = 0; i < function_read_info_arr.size(); ++i)
     {
-        if (function_read_info_arr[i].name == fn_name &&
-            function_read_info_arr[i].filename == filename)
+        if (function_read_info_arr[i].name == fn_name && function_read_info_arr[i].filename == filename)
         {
             fn_index = i;
             break;
@@ -394,9 +402,25 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
     std::string token;
     ss >> token;
     if (token == "num")
-        handle_nr(ss, filename);
+        handle_nr(ss, filename,false );
+    else if(token == "const")
+    {
+        std::string token2;
+        ss>>token2;
+
+        if(token2 == "num"){
+            handle_nr(ss,filename,true);
+        }else if(token2 == "bool"){
+            handle_bool(ss,filename,true);
+        }else{
+            std::cout<<"CANNOT CREATE CONSTANT INSTANCE OF: "<<token2<<"\n";
+        }
+    }
+    else if(token == "clear" || token == "cls"){
+        system("cls");
+    }
     else if (token == "bool")
-        handle_bool(ss, filename);
+        handle_bool(ss, filename,false);
     else if (token == "print")
         handle_print(ss, filename);
     else if (token == "toinput")
@@ -449,7 +473,24 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
         int s;
         ss >> s;
         waits(s);
+    }else if (token == "color")
+    {
+        int fg = -1, bg = -1;
+        ss >> fg;
+        if (ss >> bg)
+        {
+            set_console_color(fg, bg);
+        }
+        else if (fg != -1)
+        {
+            set_console_color(fg, -1); // only foreground, keep current background
+        }
+        else
+        {
+            std::cout << "Usage: color <fg> [bg]\n";
+        }
     }
+
     else
     {
         std::string op, arg1, arg2, arg3;
@@ -468,21 +509,23 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
         {
             int result = operation_statement(arg1, arg2, arg3, filename);
             auto it = program_data[prog_idx].name_to_indx.find(token);
-            if (it != program_data[prog_idx].name_to_indx.end())
+            if (it != program_data[prog_idx].name_to_indx.end() && program_data[prog_idx].values[it->second].constant==false)
                 program_data[prog_idx].values[it->second].value = std::to_string(result);
             else
-                std::cout << "Variable not found: " << token << "\n";
+                std::cout << "Can't modify variable: " << token << " - variable is either constant or null\n";
         }
         else if (type == "bool type")
         {
             bool result = bool_statement(arg1, arg2, arg3, filename);
             auto it = program_data[prog_idx].name_to_indx.find(token);
-            if (it != program_data[prog_idx].name_to_indx.end())
+            if (it != program_data[prog_idx].name_to_indx.end() && program_data[prog_idx].values[it->second].constant==false)
                 program_data[prog_idx].values[it->second].value = result ? "true" : "false";
             else
-                std::cout << "Variable not found: " << token << "\n";
+                std::cout << "Can't modify variable: " << token << " - variable is either constant or null\n";
         }
         else
+        {
             std::cout << "Unsupported variable type: " << token << "\n";
+        }    
     }
 }
