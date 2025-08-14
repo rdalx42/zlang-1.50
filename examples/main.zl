@@ -1,37 +1,33 @@
 
--- this is an example
+-- grid drawing program
 
-fn foo : x {
-  
-  if x is 6 {
+const num I_SIZE = 10 
+const num J_SIZE = 10
 
-    return 6
-  }
-  
-  if x is 5 {
-    x = x + 1
-    if x is 6 {
-      return 5
+fn draw {
+    num i = 0 
+    num j = 0
+
+    while true {
+
+        i = 0 
+        
+        while i < I_SIZE {
+            print \n
+            i = i + 1
+            j = 0 
+            while j < J_SIZE {
+                color  15 1
+                print * 
+
+                j = j + 1
+            }
+        }
+
+        waitms 5 
+
+        clear
     }
-  }
 }
 
-fire foo : 5
-num fooResult = :foo
-
-print this is the main.zl file \n
-
-print $fooResult
-
-wait 5
-
-print program ended! \n 
-
-waitms 25 
-
-print just kidding \n
-
-fire foo : 6
-num fooResult2 = :foo
-
-print $fooResult2
+fire draw 
