@@ -84,12 +84,48 @@ void handle_print(std::stringstream& ss, const std::string& filename)
 {
     std::string line;
     std::getline(ss, line);
+    
     size_t i = 0;
-    while (i < line.size() && isspace(line[i]))
-        ++i;
-    while (i < line.size())
+    size_t j = line.size();
+
+    bool got_start=false;
+    bool got_end=false;
+
+    if(line.empty())
     {
-        if (i + 1 < line.size() && line[i] == '\\' && std::tolower(line[i + 1]) == 'n')
+        std::cout<<"Cannot print empty content\n";
+        return;
+    }
+
+    while(i<line.size()){
+        if(line[i] == '\"' || line[i] == '\''){
+            got_start=true;
+            break;
+        }
+        ++i;
+    }
+
+    while (j>i){
+        if(line[j] == '\"'||line[j] == '\''){
+            got_end=true;
+            break;
+        }
+        --j;
+    }
+
+    if(got_end==false || got_start==false){
+        std::cout<<"Expected quotes at end and start of print statement\n";
+        return;
+    }
+
+    ++i; 
+    --j; 
+ 
+    while (i <= j && isspace(line[i]))
+        ++i;
+    while (i <= j)
+    {
+        if (i + 1 <= j && line[i] == '\\' && std::tolower(line[i + 1]) == 'n')
         {
             std::cout << "\n";
             i += 2;
@@ -98,7 +134,7 @@ void handle_print(std::stringstream& ss, const std::string& filename)
         {
             std::string varname;
             ++i;
-            while (i < line.size() && !isspace(line[i]))
+            while (i <= j  && !isspace(line[i]))
                 varname += line[i++];
             if (program_data[get_index(filename)].name_to_indx.find(varname) != program_data[get_index(filename)].name_to_indx.end())
             {
@@ -121,7 +157,7 @@ void handle_print(std::stringstream& ss, const std::string& filename)
     }
 }
 
-void skip_if_block(int& line_indx, const std::string& filename)
+void skip_if_block(int& line_indx, const std::string& filename, int lines)
 {
     int depth = 0;
     for (int i = line_indx; i < lines; ++i)
@@ -141,7 +177,7 @@ void skip_if_block(int& line_indx, const std::string& filename)
     }
 }
 
-void handle_if(std::stringstream& ss, int& line_indx, const std::string& filename)
+void handle_if(std::stringstream& ss, int& line_indx, const std::string& filename, int lines)
 {
     std::string left, op, right, brace;
     ss >> left >> op >> right >> brace;
@@ -180,7 +216,7 @@ void handle_if(std::stringstream& ss, int& line_indx, const std::string& filenam
     {
         for (int i = startBlock; i < endBlock; ++i)
         {
-            proccess_line(zlang_input[i], i, filename);
+            proccess_line(zlang_input[i], i, filename,lines);
         }
     }
 
@@ -189,7 +225,7 @@ void handle_if(std::stringstream& ss, int& line_indx, const std::string& filenam
 
 
 
-void handle_while(std::stringstream& ss, int& line_indx, const std::string& filename)
+void handle_while(std::stringstream& ss, int& line_indx, const std::string& filename, int lines)
 {
     std::string left, op, right, brace;
     ss >> left;
@@ -245,12 +281,12 @@ void handle_while(std::stringstream& ss, int& line_indx, const std::string& file
     while ( op.empty() ? bool_statement(left, "is", "true", filename) : bool_statement(left, op, right, filename) )
     {
         for (int i = start; i < end; ++i)
-            proccess_line(zlang_input[i], i, filename);
+            proccess_line(zlang_input[i], i, filename,lines);
     }
     line_indx = end + 1;
 }
 
-void handle_function_def(std::stringstream& ss, int& line_indx, const std::string& filename)
+void handle_function_def(std::stringstream& ss, int& line_indx, const std::string& filename, int lines)
 {
     std::string name, token;
     ss >> name >> token;
@@ -298,7 +334,8 @@ void handle_function_def(std::stringstream& ss, int& line_indx, const std::strin
     }
 }
 
-void handle_function_fire(std::stringstream& ss, const std::string& filename)
+
+void handle_function_fire(std::stringstream& ss, const std::string& filename, int lines)
 {
     std::string fn_name, token;
     ss >> fn_name >> token;
@@ -363,7 +400,7 @@ void handle_function_fire(std::stringstream& ss, const std::string& filename)
     {
         remove_whitespace(file_lines[i]);
 
-        proccess_line(file_lines[i], i, filename);
+        proccess_line(file_lines[i], i, filename,lines);
 
         if (!program_data[get_index(filename)].fn_values[fn_name].empty())
         {
@@ -376,6 +413,32 @@ void handle_function_fire(std::stringstream& ss, const std::string& filename)
     current_fn_name = "";
 }
 
+void handle_import(const std::string& filename, const std::string& current_filename){
+    
+    std::ifstream file(filename);
+    
+    if(filename == current_filename){
+        std::cout<<"Cannot import the same file as the current one!\n";
+        file.close();
+        return;
+    }
+
+    if(filename.substr(filename.size()-3) != ".zl"){
+        std::cout<<"Only zLang files can be imported!\n";
+        file.close();
+        return;
+    }
+
+    if(!file.is_open()){
+        std::cout<<"Couldn't import file "<<filename<<"\n";
+        file.close();
+        return;
+    }
+
+    RUN_ZLANG(filename, get_input_from_file(filename), get_size_from_file(filename));
+
+    file.close();
+}
 
 void waitms(int ms)
 {
@@ -393,7 +456,7 @@ void waits(int s)
         std::this_thread::sleep_for(std::chrono::milliseconds(s * 1000));
 }
 
-void proccess_line(std::string& x, int& line_indx, const std::string& filename)
+void proccess_line(std::string& x, int& line_indx, const std::string& filename, int lines)
 {
     remove_whitespace(x);
     if (x.empty())
@@ -423,6 +486,7 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
         handle_bool(ss, filename,false);
     else if (token == "print")
         handle_print(ss, filename);
+    
     else if (token == "toinput")
     {
         std::string var;
@@ -436,11 +500,11 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
         return;
     else if (token == "if"){
        // std::cout<<"if\n";
-        handle_if(ss, line_indx, filename);
+        handle_if(ss, line_indx, filename,lines);
     }else if (token == "while"){
-        handle_while(ss, line_indx, filename);
+        handle_while(ss, line_indx, filename,lines);
     }else if (token == "fn"){
-        handle_function_def(ss, line_indx, filename);
+        handle_function_def(ss, line_indx, filename, lines);
     }else if (token == "return")
     {
         std::string value;
@@ -461,13 +525,34 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename)
             program_data[get_index(filename)].fn_values[current_fn_name] = value;
     }
     else if (token == "fire")
-        handle_function_fire(ss, filename);
+        handle_function_fire(ss, filename,lines);
     else if (token == "waitms")
     {
         int ms;
         ss >> ms;
         waitms(ms);
+    }else if (token == "import") {
+        std::string rest_of_line;
+        std::getline(ss, rest_of_line); 
+
+        auto trim = [](std::string& s) {
+            s.erase(0, s.find_first_not_of(" \t"));
+            s.erase(s.find_last_not_of(" \t") + 1);
+        };
+        trim(rest_of_line);
+
+        if (rest_of_line.size() >= 2 && 
+            rest_of_line.front() == '"' && 
+            rest_of_line.back() == '"') {
+
+            std::string import_filename = rest_of_line.substr(1, rest_of_line.size() - 2);
+            handle_import(import_filename, filename);
+        } 
+        else {
+            std::cerr << "Imported filename must be in quotes\n";
+        }
     }
+
     else if (token == "wait")
     {
         int s;
