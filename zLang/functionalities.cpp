@@ -162,7 +162,7 @@ void skip_if_block(int& line_indx, const std::string& filename, int lines)
     int depth = 0;
     for (int i = line_indx; i < lines; ++i)
     {
-        const std::string& line = zlang_input[i];
+        const std::string& line = program_data[get_index(filename)].file_input[i];
         if (line.find("{") != std::string::npos)
             depth++;
         if (line.find("}") != std::string::npos)
@@ -190,12 +190,12 @@ void handle_if(std::stringstream& ss, int& line_indx, const std::string& filenam
 
     for (int i = line_indx; i < lines; ++i)
     {
-        if (zlang_input[i].find("{") != std::string::npos)
+        if (program_data[get_index(filename)].file_input[i].find("{") != std::string::npos)
         {
             if (depth == 0) startBlock = i + 1;
             depth++;
         }
-        else if (zlang_input[i].find("}") != std::string::npos)
+        else if (program_data[get_index(filename)].file_input[i].find("}") != std::string::npos)
         {
             depth--;
             if (depth == 0)
@@ -216,7 +216,7 @@ void handle_if(std::stringstream& ss, int& line_indx, const std::string& filenam
     {
         for (int i = startBlock; i < endBlock; ++i)
         {
-            proccess_line(zlang_input[i], i, filename,lines);
+            proccess_line(program_data[get_index(filename)].file_input[i], i, filename,lines);
         }
     }
 
@@ -260,7 +260,7 @@ void handle_while(std::stringstream& ss, int& line_indx, const std::string& file
     int depth = 0;
     for (int i = start; i < lines; ++i)
     {
-        const std::string& line = zlang_input[i];
+        const std::string& line = program_data[get_index(filename)].file_input[i];
         if (line.find("{") != std::string::npos)
             depth++;
         if (line.find("}") != std::string::npos)
@@ -281,16 +281,18 @@ void handle_while(std::stringstream& ss, int& line_indx, const std::string& file
     while ( op.empty() ? bool_statement(left, "is", "true", filename) : bool_statement(left, op, right, filename) )
     {
         for (int i = start; i < end; ++i)
-            proccess_line(zlang_input[i], i, filename,lines);
+            proccess_line(program_data[get_index(filename)].file_input[i], i, filename,lines);
     }
     line_indx = end + 1;
 }
 
 void handle_function_def(std::stringstream& ss, int& line_indx, const std::string& filename, int lines)
 {
+
     std::string name, token;
     ss >> name >> token;
     current_fn_name = name;
+    
     if (token == ":")
     {
         std::string param;
@@ -309,7 +311,8 @@ void handle_function_def(std::stringstream& ss, int& line_indx, const std::strin
     bool started = false;
     for (int i = line_indx; i < lines; ++i)
     {
-        std::string& line = zlang_input[i];
+        std::string& line = program_data[get_index(filename)].file_input[i];
+        
         if (line.find("{") != std::string::npos)
         {
             depth++;
@@ -323,14 +326,17 @@ void handle_function_def(std::stringstream& ss, int& line_indx, const std::strin
             if (depth == 0)
             {
                 info.end_indx = i + 1;
-                function_read_info_arr.push_back(info);
+                program_data[get_index(filename)].function_read_info_arr.push_back(info);
                 program_data[get_index(filename)].fn_contents[name] = fn_body;
                 line_indx = i + 1;
+               
                 return;
             }
         }
         if (started && depth > 0)
             fn_body += line + "\n";
+
+        program_data[get_index(filename)].line_indx=i;
     }
 }
 
@@ -341,9 +347,9 @@ void handle_function_fire(std::stringstream& ss, const std::string& filename, in
     ss >> fn_name >> token;
 
     int fn_index = -1;
-    for (int i = 0; i < function_read_info_arr.size(); ++i)
+    for (int i = 0; i <  program_data[get_index(filename)].function_read_info_arr.size(); ++i)
     {
-        if (function_read_info_arr[i].name == fn_name && function_read_info_arr[i].filename == filename)
+        if ( program_data[get_index(filename)].function_read_info_arr[i].name == fn_name &&  program_data[get_index(filename)].function_read_info_arr[i].filename == filename)
         {
             fn_index = i;
             break;
@@ -390,9 +396,9 @@ void handle_function_fire(std::stringstream& ss, const std::string& filename, in
     while (std::getline(file, line))
         file_lines.push_back(line);
     file.close();
-
-    int start = function_read_info_arr[fn_index].start_indx + 1;
-    int end = function_read_info_arr[fn_index].end_indx - 1;
+    
+    int start =  program_data[get_index(filename)].function_read_info_arr[fn_index].start_indx + 1;
+    int end =  program_data[get_index(filename)].function_read_info_arr[fn_index].end_indx - 1;
     if (start < 0) start = 0;
     if (end > static_cast<int>(file_lines.size())) end = file_lines.size();
 
@@ -458,6 +464,8 @@ void waits(int s)
 
 void proccess_line(std::string& x, int& line_indx, const std::string& filename, int lines)
 {
+   // std::cout<<x<<"<<\n";
+
     remove_whitespace(x);
     if (x.empty())
         return;
@@ -504,6 +512,7 @@ void proccess_line(std::string& x, int& line_indx, const std::string& filename, 
     }else if (token == "while"){
         handle_while(ss, line_indx, filename,lines);
     }else if (token == "fn"){
+      //  std::cout<<"DEF\n";
         handle_function_def(ss, line_indx, filename, lines);
     }else if (token == "return")
     {
