@@ -147,14 +147,6 @@ waitms 5
 print "wait completed in miliseconds"
 ```
 
-**Import other programs**
-
-```zLang
-
-import "hi.zl"
-print "Imported hi.zl!\n"
-```
-
 hi.zl:
 
 ```zLang
@@ -165,23 +157,19 @@ print "Hiiiiii"
 **Change console color**
 
 ```zLang
--- Set foreground color to light green (2)
+
 color fg 2
 
--- Wait for 2 seconds to let user see the effect
 wait 2
 
--- Set background color to blue (1) and keep foreground white (7)
 color bg 1
 
 wait 2
 
--- Set both foreground and background (red on yellow)
 color both 4 6
 
 wait 2
 
--- Reset to default (white on black)
 color both 7 0
 
 ```
