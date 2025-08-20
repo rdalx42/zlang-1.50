@@ -34,23 +34,33 @@ void remove_whitespace(std::string& x) {
 }
 
 void RUN_ZLANG(const std::string& filename, std::vector<std::string> source, int lines_of_code) {
+    
+    // here's the main issue with the zlang run function when importing 
+    // probably overwritten or smth, look into here
+    
     zLangProgram CURRENT_DATA;
     CURRENT_DATA.name = filename;
-
+    CURRENT_DATA.file_input.resize(lines_of_code);
+    
     for (int i = 0; i < lines_of_code; ++i) {
-        CURRENT_DATA.line_indx = i;
-
+        
         std::string line = source[i];  
         remove_whitespace(line);
-
-        if (line.empty()) {
-            continue;
-        }
-
-        proccess_line(line, CURRENT_DATA.line_indx, filename, lines_of_code);
+        CURRENT_DATA.file_input[i]=line;
+       // std::cout<<CURRENT_DATA.file_input[i]<<"\n";
     }
 
-    program_data.push_back(CURRENT_DATA);
+    program_data[var_indx]=CURRENT_DATA;
+    
+    std::cout<<CURRENT_DATA.name<<"\n";
+
+    for(int i = 0; i < lines_of_code; ++ i){
+        program_data[get_index(filename)].line_indx=i;
+        
+        proccess_line(program_data[get_index(filename)].file_input[i],i,filename,lines_of_code);
+    }
+
+    var_indx++;
 }
 
 std::vector<std::string> get_input_from_file(const std::string& filename) {
@@ -91,9 +101,9 @@ int get_size_from_file(const std::string& filename){
     return line_count;
 }
 
-void clean_program_input() {
+void clean_program_input(const std::string& filename) {
     for (int l = 0; l < lines; ++l) {
-        std::string current_ln = zlang_input[l];
+        std::string current_ln = program_data[get_index(filename)].file_input[l];
         std::string cleaned_line;
         bool in_string = false;
         char string_delim = '\0';
@@ -143,12 +153,12 @@ void clean_program_input() {
             if (!matched_token) cleaned_line += c;
         }
 
-        zlang_input[l] = cleaned_line;
+        program_data[get_index(filename)].file_input[l] = cleaned_line;
     }
 }
 
-void output_input() {
-    for (int i = 0; i < lines; ++i) std::cout << zlang_input[i] << "\n";
+void output_input(const std::string& filename) {
+    for (int i = 0; i < lines; ++i) std::cout << program_data[get_index(filename)].file_input[i] << "\n";
 }
 
 void output_program_input() {
