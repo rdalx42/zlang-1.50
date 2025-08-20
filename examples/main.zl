@@ -1,8 +1,6 @@
 
 -- grid drawing program
 
-import "IMPORT_ME.zl"
-
 const num I_SIZE = 10 
 const num J_SIZE = 10
 
