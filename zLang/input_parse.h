@@ -17,7 +17,7 @@ extern int var_indx;
 int get_size_from_file(const std::string& filename);
 
 void RUN_ZLANG(const std::string& x,std::vector<std::string> source, int lines_of_code );
-void clean_program_input();
+void clean_program_input(const std::string& filename);
 void remove_whitespace(std::string& x);
 void output_input();
 void output_program_input();
