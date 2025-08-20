@@ -19,8 +19,10 @@ int get_index(const std::string& name)
 {
     for (int i = 0; i < program_data.size(); i++)
     {
-        if (program_data[i].name == name)
+        if (program_data[i].name == name){
+          //  std::cout<<program_data[i].name<<"\n";
             return i;
+        }    
     }
     return -1;
 }
@@ -78,9 +80,9 @@ std::string get_var_type(std::string& name, std::string& filename)
 
 int get_function_read_info_arr_indx(std::string& fname, const std::string& filename)
 {
-    for (int i = 0; i < function_read_info_arr.size(); i++)
+    for (int i = 0; i < program_data[get_index(filename)].function_read_info_arr.size(); i++)
     {
-        if (function_read_info_arr[i].name == fname && function_read_info_arr[i].filename == filename)
+        if ( program_data[get_index(filename)].function_read_info_arr[i].name == fname &&  program_data[get_index(filename)].function_read_info_arr[i].filename == filename)
             return i;
     }
     return -1;
