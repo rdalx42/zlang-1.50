@@ -147,12 +147,6 @@ waitms 5
 print "wait completed in miliseconds"
 ```
 
-hi.zl:
-
-```zLang
-
-print "Hiiiiii"
-```
 
 **Change console color**
 
